@@ -133,8 +133,12 @@ def main():
 					'convieneSvolta',
 					"predAction"
 					])
+			
+			##############################DEPRECATO#########################################
 
-			df = df.append(df_temp)
+			#df = df.append(df_temp)
+			df = pd.concat([df, df_temp], ignore_index=True)
+
 			ind += 1
 
 		# Compute Generation Metrics

@@ -370,7 +370,10 @@ def createScenarios(conf,population,randomize=True):
 					"probPass",
 					"AltruismLevel"
 					])
-			df=df.append(df_temp)
+			########################################DEPRECATA##############################
+			#df=df.append(df_temp) 
+			df = pd.concat([df, df_temp], ignore_index=True)
+
 			
 	
 	return df
