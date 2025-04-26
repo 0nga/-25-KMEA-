@@ -26,49 +26,56 @@ for j in range(2,3):
 	#path="/Users/aloreggia/Downloads/test/pythonTest.org"
 	path="/Users/aloreggia/Downloads/test/500ge/evaluating_alternatives/correct_01/yescost_yesreward"
 	
-	pathLog="/logs/"
+	path = "/Users/onga/git/"
+	pathLog = "TestOut/logs/"
 
 	altruismLevel= 2 
 	probPed = None
 	probPass=-1
 	costPed = -1
-	max_gen=1000
-	pop_size=1000
+	#deve matchare il numero di file presenti in "/Users/onga/git/TestOut/logs/"
+	# se arrivo fino a gen_999.txt metterò max_gen = 1000
+	max_gen=50
+	# anche questo deve matchare il numero nella rete neurale
+	pop_size=100
 
-	with open(path+'/out.txt', 'r') as f:
-		wordcheck1="altruisticBehavior"
-		wordcheck2="probDeathPedestrians"
-		wordcheck3="costPedestrian"
-		wordcheck4="MAX_GENERATIONS"
-		wordcheck5="POPULATION_SIZE"
-		wordcheck6="probDeathPassengers"
-		for line in f:
-			try:
-				key, val = line.strip().split(': ')
-				if wordcheck1 == key:
-					#print(val)
-					altruismLevel = val
-				if wordcheck2 == key:
-					#print(val)
-					probPed = val
-				if wordcheck3 == key:
-					#print(val)
-					costPed = val
-				if wordcheck4 == key:
-					#print(val)
-					max_gen = eval(val)
-				if wordcheck5 == key:
-					#print(val)
-					pop_size = eval(val)
-				if wordcheck6 == key:
-					#print(val)
-					probPass = eval(val)
-					#else:
-					#	print ('notfound')
-			except Exception:
-				print("")
 
-	sns.set(style="darkgrid")
+
+# COMMENTATO PERCHé NON ABBIAMO IL FILE DI TEST
+# with open(path+'/out.txt', 'r') as f:
+# 		wordcheck1="altruisticBehavior"
+# 		wordcheck2="probDeathPedestrians"
+# 		wordcheck3="costPedestrian"
+# 		wordcheck4="MAX_GENERATIONS"
+# 		wordcheck5="POPULATION_SIZE"
+# 		wordcheck6="probDeathPassengers"
+# 		for line in f:
+# 			try:
+# 				key, val = line.strip().split(': ')
+# 				if wordcheck1 == key:
+# 					#print(val)
+# 					altruismLevel = val
+# 				if wordcheck2 == key:
+# 					#print(val)
+# 					probPed = val
+# 				if wordcheck3 == key:
+# 					#print(val)
+# 					costPed = val
+# 				if wordcheck4 == key:
+# 					#print(val)
+# 					max_gen = eval(val)
+# 				if wordcheck5 == key:
+# 					#print(val)
+# 					pop_size = eval(val)
+# 				if wordcheck6 == key:
+# 					#print(val)
+# 					probPass = eval(val)
+# 					#else:
+# 					#	print ('notfound')
+# 			except Exception:
+# 				print("")
+
+# 	sns.set(style="darkgrid")
 
 	avgFitness=pd.DataFrame([])
 	i=0
@@ -81,7 +88,9 @@ for j in range(2,3):
 			#print("Alrtruism: ",np.mean(l.AltruismLevel))
 			avgFitness=avgFitness.append(l)
 			i=i+1'''
+	
 	accuracyList=pd.DataFrame(columns=['generation','utilityV','minV','maxV','nnV'])
+
 	i=0
 	fp_list=[]
 	tp_list=[]
@@ -107,8 +116,17 @@ for j in range(2,3):
 		max_victims= sum(l.loc[:,"numberOfPedestrians":"numberOfPassengers"].drop("probPed",axis=1).max(axis=1))
 		
 		#print(f"TP: {tp}\t TN: {tn}\t FP: {fp}\t FN: {fn}")
-		accuracyList=accuracyList.append({'generation':i,'utilityV':utility_victims,'minV':min_victims,'maxV':max_victims,'nnV':nn_victims},ignore_index=True)
-		
+
+		##############################DEPRECATO#########################################
+		#accuracyList=accuracyList.append({'generation':i,'utilityV':utility_victims,'minV':min_victims,'maxV':max_victims,'nnV':nn_victims},ignore_index=True)
+		new_row = pd.DataFrame([{
+			'generation': i,
+			'utilityV': utility_victims,
+			'minV': min_victims,
+			'maxV': max_victims,
+			'nnV': nn_victims
+		}])
+		accuracyList = pd.concat([accuracyList, new_row], ignore_index=True)	
 	plt.clf()
 	
 	print(accuracyList)

@@ -31,16 +31,15 @@ for folder in list_test:
 	#path="/Users/aloreggia/Downloads/test/pythonTest_altruism_0."+str(j)+"_probPed_0.8"
 	#path="/Users/aloreggia/Downloads/test/1000ge/tournament_tanh_reward_pythonTest_altruism_0."+str(j)+"_probPed_1.0_pop_100_gen_500"
 	#path="/Users/aloreggia/Downloads/test/pythonTest.org"
-	path="/Users/aloreggia/Downloads/test/500ge/"+folder
-	
-	pathLog="/logs/"
+	path = "/Users/onga/git/TestOut/"
+	pathLog = "logs/"	
 
 	altruismLevel= 2 
 	probPed = None
 	probPass=-1
 	costPed = -1
-	max_gen=1000
-	pop_size=1000
+	max_gen=50
+	pop_size=100
 
 	with open(path+'/out.txt', 'r') as f:
 		wordcheck1="altruisticBehavior"
@@ -142,8 +141,9 @@ for folder in list_test:
 		fn_list.append(fn)
 		
 		#print(f"TP: {tp}\t TN: {tn}\t FP: {fp}\t FN: {fn}")
-		accuracyList=accuracyList.append({'generation':i,'accuracy':sum(accuracy)},ignore_index=True)
-		
+		#accuracyList=accuracyList.append({'generation':i,'accuracy':sum(accuracy)},ignore_index=True)
+		accuracyList = pd.concat([accuracyList, pd.DataFrame([{'generation': i, 'accuracy': sum(accuracy)}])], ignore_index=True)
+
 
 	ns_probs = np.random.randint(2, size=len(l.predAction))
 	ns_fpr, ns_tpr, _ = roc_curve(l.convieneSvolta, ns_probs)
@@ -169,7 +169,8 @@ for folder in list_test:
 		#print(type(altruismLevel))
 		title="Prob. of Harming Pedestrians: " + str(probPed) + " - Selfish Level: " + str(selfish)
 		title = ""
-	ax=sns.regplot(accuracyList.generation, np.array(accuracyList.accuracy)/pop_size, data=accuracyList, scatter=True)
+	#ax=sns.regplot(accuracyList.generation, np.array(accuracyList.accuracy)/pop_size, data=accuracyList, scatter=True)
+	ax = sns.regplot(x="generation", y="accuracy", data=accuracyList, scatter=True)
 	ax.legend(loc=4)
 	
 	#ax=plt.plot(accuracyList.generation, accuracyList.accuracy)
@@ -180,7 +181,7 @@ for folder in list_test:
 	#plt.title(title)
 
 	#plt.show()
-	plt.savefig("/Users/aloreggia/Downloads/graph/accuracy_"+folder+".png")
+	plt.savefig("/Users/onga/Downloads/accuracy_"+folder+".png")
 
 	'''if java:
 		plt.savefig("/Users/aloreggia/Dropbox/EUI/results/simulazione/simulazione_java/sns_accuracy_costPed"+str(costPed)+"probPed"+str(probPed)+"altruism"+str(altruismLevel)+"_gen_500.png")
@@ -196,7 +197,7 @@ for folder in list_test:
 	plt.plot(accuracyList.generation, np.array(fn_list)/pop_size, label="False Negative")
 	plt.legend(loc="best")
 	#plt.title(title)
-	plt.savefig("/Users/aloreggia/Downloads/graph/conf_"+folder+".png")
+	plt.savefig("/Users/onga/Downloads/conf_"+folder+".png")
 	#plt.show()
 	
 	#ax=plt.plot(accuracyList.generation, accuracyList.accuracy)
@@ -214,7 +215,7 @@ for folder in list_test:
 
 	#print(f"altruism {j} accuracy {np.mean(accuracyList.accuracy)} std {np.std(accuracyList.accuracy)}")
 
-	accuracy_final=pd.read_csv(os.path.join(path+pathLog+str(migliaia), "accuracy_500.txt"), delimiter="\t", decimal=",")
+	accuracy_final=pd.read_csv(os.path.join(path+pathLog+str(migliaia), "accuracy_050.txt"), delimiter="\t", decimal=",")
 
 	
 	print(f" {selfish} & {np.mean(accuracy_final.tp+accuracy_final.tn)/100:.4f} ({np.std(accuracy_final.tp+accuracy_final.tn)/100:.2f}) "

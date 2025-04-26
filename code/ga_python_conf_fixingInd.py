@@ -454,7 +454,10 @@ def main():
 					'convieneSvolta',
 					"predAction"
 					])
-			df=df.append(df_temp)
+			##############################DEPRECATO#########################################
+
+			#df = df.append(df_temp)
+			df = pd.concat([df, df_temp], ignore_index=True)
 			
 			#p = mutate_chromosome(conf,p)
 			
@@ -503,7 +506,10 @@ def main():
 		fn = sum((df.convieneSvolta==True) & (isSvolta==False))
 		
 		#print(f"TP: {tp}\t TN: {tn}\t FP: {fp}\t FN: {fn}")
-		accuracyList=accuracyList.append({'individual':p,'fp':fp,'fn':fn,'tp':tp,'tn':tn},ignore_index=True)
+		### DEPRECATA ###
+		# accuracyList=accuracyList.append({'individual':p,'fp':fp,'fn':fn,'tp':tp,'tn':tn},ignore_index=True)
+		accuracyList = pd.concat([accuracyList, pd.DataFrame([{'individual': p, 'fp': fp, 'fn': fn, 'tp': tp, 'tn': tn}])], ignore_index=True)
+
 		i = i + 1
 		
 	#print(accuracyList)

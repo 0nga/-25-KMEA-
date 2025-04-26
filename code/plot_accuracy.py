@@ -22,16 +22,16 @@ for j in range(1,6):
 	#path="/Users/aloreggia/Downloads/test/pythonTest_altruism_0."+str(j)+"_probPed_0.8"
 	#path="/Users/aloreggia/Downloads/test/1000ge/tournament_tanh_reward_pythonTest_altruism_0."+str(j)+"_probPed_1.0_pop_100_gen_500"
 	#path="/Users/aloreggia/Downloads/test/pythonTest.org"
-	path="/Users/aloreggia/Downloads/test/500ge/nocost_noreward"
 	
-	pathLog="/logs/"
+	path = "/Users/onga/git/TestOut/"
+	pathLog = "logs/"	
 
 	altruismLevel= -1 
 	probPed = -1
 	probPass=-1
 	costPed = -1
-	max_gen=1000
-	pop_size=1000
+	max_gen=50
+	pop_size=100
 
 	with open(path+'/out.txt', 'r') as f:
 		wordcheck1="altruisticBehavior"
@@ -79,14 +79,16 @@ for j in range(1,6):
 			#print("Alrtruism: ",np.mean(l.AltruismLevel))
 			avgFitness=avgFitness.append(l)
 			i=i+1'''
-	accuracyList=pd.DataFrame(columns=['generation','accuracy'])
+	#accuracyList=pd.DataFrame(columns=['generation','accuracy'])
+	accuracy_data = []
+
 	maxFitness=pd.DataFrame(columns=['index','maxFit'], dtype=float)
 	i=0
 	fp_list=[]
 	tp_list=[]
 	fn_list=[]
 	tn_list=[]
-	for i in range(140):
+	for i in range(max_gen):
 		s="%03d"%i
 		#print(os.path.join(path, file))
 		migliaia=int(i/1000);
@@ -110,7 +112,9 @@ for j in range(1,6):
 		fn_list.append(fn)
 		
 		#print(f"TP: {tp}\t TN: {tn}\t FP: {fp}\t FN: {fn}")
-		accuracyList=accuracyList.append({'generation':i,'accuracy':sum(accuracy)},ignore_index=True)
+		#accuracyList=accuracyList.append({'generation':i,'accuracy':sum(accuracy)},ignore_index=True)
+		accuracy_data.append({'generation': i, 'accuracy': sum(accuracy)})
+
 		
 
 	ns_probs = np.random.randint(2, size=len(l.predAction))
@@ -124,6 +128,8 @@ for j in range(1,6):
 	plt.legend()
 	plt.show()
 
+	accuracyList = pd.DataFrame(accuracy_data)
+
 	accuracyList.generation=accuracyList.generation.astype('float64')
 	accuracyList.accuracy=accuracyList.accuracy.astype('float64')
 	print(accuracyList)
@@ -131,7 +137,8 @@ for j in range(1,6):
 		title="JAVA - Death Pedestrian: " + str(probPed) + " selfish: " + str(1-eval(altruismLevel))
 	else:
 		title="PYTHON - Death Pedestrian: " + str(probPed) + " selfish: " + str(1-eval(altruismLevel))
-	ax=sns.regplot(accuracyList.generation, np.array(accuracyList.accuracy)/pop_size, data=accuracyList,label="selfish: "+str(1-eval(altruismLevel)), scatter=True)
+#	ax=sns.regplot(accuracyList.generation, np.array(accuracyList.accuracy)/pop_size, data=accuracyList,label="selfish: "+str(1-eval(altruismLevel)), scatter=True)
+	ax = sns.regplot(x="generation", y="accuracy", data=accuracyList.assign(accuracy=accuracyList.accuracy/pop_size), label="selfish: "+str(1-eval(altruismLevel)), scatter=True)
 	ax.legend(loc=4)
 	
 	#ax=plt.plot(accuracyList.generation, accuracyList.accuracy)

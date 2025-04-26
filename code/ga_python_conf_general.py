@@ -22,6 +22,10 @@ random.seed(42)
 def main():
 
 	conf=Configuration()
+	
+	'''
+	Arguments Management
+	'''
 	opts, args = getopt.getopt(sys.argv[1:],"ha:o:g:p:e:r")
 	print(f"Arguments count: {len(sys.argv)}")
 	for opt, arg in opts:

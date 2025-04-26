@@ -1,3 +1,26 @@
-Da lanciare su terminale (modificar i percorsi dei due file a seconda di come son messi sul pc)
-
+Da lanciare su terminale (modificare i percorsi dei due file a seconda di come son messi sul pc)
 python3 ga_python_conf_general.py -g 500 -p 100 -a 0.2 -e 0.1 -o /path/to/output
+
+
+-g = MAX_GENERATIONS
+-p = POPULATION_SIZE
+-a = ALTRUISM
+-e = probDeathPedestrians
+-o = output file path 
+-r = randomizeAltruism
+
+python3 ./-25-KMEA-/code/ga_python_conf_general.py -g 500 -p 100 -a 0.2 -e 0.1 -o -25-KMEA-/code/outputTest
+
+Puoi usare anche ga_python_conf_fixingInd.py
+
+
+
+
+Nei seguenti script bisogna settare bene al loro interno i numeri nelle variabili 
+e i percorsi dei file che devono leggere (sono quelli generati con la rete neurale)
+
+- plot_accuracy funziona
+- plot_victims funziona ma genera un grafico vuoto
+- plot_accuracy_general funge ma solo uno dei grafici viene generato, l'altro rimane vuoto
+- plot_knobFunc funge ma non legge niente da file, è inutile mi sa
+- plotExperiments Devo ancora testare
