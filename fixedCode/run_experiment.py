@@ -22,7 +22,7 @@ prob = 0.1
 # Comando corretto
 command = [
     "python3",
-    "./-25-KMEA-/fixedCode/ga_python_conf.py",
+    "./-25-KMEA-/fixedCode/ga_general.py",
     "-g", "20",
     "-p", "100",
     #"-a", f"0.{i}",
