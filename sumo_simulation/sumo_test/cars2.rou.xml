@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- generated on 2020-10-16 13:59:12.656933 by randomTrips.py UNKNOWN
-  options: -n test.net.xml -p 50 <doubleminus>fringe-factor 100 -o cars2.rou.xml
+
+<!-- generated on 2025-05-06 16:24:57.946182 by randomTrips.py UNKNOWN
+<configuration>
+    <net-file value="test.net.xml"/>
+    <output-trip-file value="cars2.rou.xml"/>
+    <fringe-factor value="100"/>
+    <period value="50.0"/>
+</configuration>
 -->
+
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <trip id="0" depart="0.00" from="gneE17" to="-gneE17"/>
     <trip id="1" depart="50.00" from="-gneE3" to="-gneE17"/>
