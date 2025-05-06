@@ -10,11 +10,10 @@ prob_value=(1.0, 0.8, 0.5, 0.1)
 
 prob=1.0
 
-
-command="/Users/aloreggia/Dropbox/EUI/EthicalKnobSim-master/scripts/processing/ga_python_conf_general.py  -g 500 -p 100 -r -o /Users/aloreggia/Downloads/test/500ge/reward_05_cost_0_1_bis"
+command = "./-25-KMEA-/code/ga_python_conf_general.py -g 50 -p 100 -r -e " + str(prob) + " -o -25-KMEA-/code/outputTest"
 
 print(command)
 
-p=subprocess.run("python " + command, shell=True)
+p=subprocess.run("python3 " + command, shell=True)
 print(p == None)
 

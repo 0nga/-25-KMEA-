@@ -32,7 +32,7 @@ class Individual:
 		if conf.randomizeAltruism:
 		    self.altruism = random.random()
 		else:
-		    self.altruism = conf.ALTRUISM
+			self.altruism = conf.ALTRUISM
 
 		self.knob = random.random()
 		#print("Knob initialization",self.knob)

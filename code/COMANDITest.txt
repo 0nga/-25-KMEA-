@@ -9,7 +9,7 @@ python3 ga_python_conf_general.py -g 500 -p 100 -a 0.2 -e 0.1 -o /path/to/output
 -o = output file path 
 -r = randomizeAltruism
 
-python3 ./-25-KMEA-/code/ga_python_conf_general.py -g 500 -p 100 -a 0.2 -e 0.1 -o -25-KMEA-/code/outputTest
+python3 ./-25-KMEA-/code/ga_python_conf_general.py -g 50 -p 100 -a 0.2 -e 0.1 -o -25-KMEA-/code/outputTest
 
 Puoi usare anche ga_python_conf_fixingInd.py
 
