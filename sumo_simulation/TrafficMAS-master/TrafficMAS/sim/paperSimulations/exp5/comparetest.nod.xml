@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  
+    <node id="node0" x="-500.0" y="0.0" 	/>
+    <node id="node1" x="-500.0" y="-100.0" 	/> 
+    <node id="node2" x="0.0" 	y="0.0" 	/> 
+	<node id="node3" x="99.0" y="0.0" 	/>    
+    <node id="node5" x="400.0" y="0.0" 	/>
+    <node id="node6" x="100.0" y="-100.0" 	/> 
+    <node id="node7" x="600.0"	y="0.0" 	/> 
+	<node id="node8" x="900.0" y="0.0" 	/>
+    <node id="node9" x="901.0" y="0.0" 	/> 
+    
+</nodes>

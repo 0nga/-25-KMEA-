@@ -1,0 +1,6 @@
+<norm_schemes>
+    <norm_scheme id="ramp-merging">     
+        <sensors value="3"/>
+        <sanction value="LowFine"/>
+    </norm_scheme>  
+</norm_schemes>

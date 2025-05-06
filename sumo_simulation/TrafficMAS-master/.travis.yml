@@ -1,0 +1,15 @@
+language: java
+before_install:
+    - sudo apt-get update -qq 
+    - sudo apt-get install -y libgdal1h libgdal-dev g++ libxerces-c3.1 libxerces-c-dev libicu-dev libproj-dev libfox-1.6-dev libgl1-mesa-dev libglu1-mesa-dev python 
+    - wget -O 'sumo.zip' 'http://downloads.sourceforge.net/project/sumo/sumo/version%200.23.0/sumo-src-0.23.0.zip?r=&ts=1427891699&use_mirror=switch'
+    - unzip ./sumo.zip
+    - cd ./sumo-0.23.0
+    - ./configure
+    - make
+    - sudo make install
+    - cd ../
+    
+after_failure:
+    - cat TrafficMASTests/output/*
+

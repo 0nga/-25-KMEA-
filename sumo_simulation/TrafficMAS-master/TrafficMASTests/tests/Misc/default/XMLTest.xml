@@ -1,0 +1,27 @@
+<organisations>
+    <organisation id="org1">
+        <sensors>
+            <sensor id="sens1" />
+            <sensor id="sens2" />
+            <sensor id="sens4" />
+            <sensor id="sens5" />
+        </sensors>
+        <norms>
+            <norm id="norm1">
+                <norm_sensor num="1" id="sens2"/>  
+                <norm_sensor num="2" id="sens1"/>  
+                <norm_sensor num="3" id="sens4"/>  
+            </norm>
+        </norms>
+    </organisation>
+    <organisation id="org2">
+        <sensors>
+            <sensor id="sens3" />
+        </sensors>
+        <norms>
+            <norm id="norm4" />
+                <norm_sensor num="1" id="sens3"/>  
+            </norm>
+        </norms>
+    </organisation>
+</organisations>

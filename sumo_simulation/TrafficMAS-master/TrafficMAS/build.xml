@@ -1,0 +1,53 @@
+<project name="TrafficMAS" default="build" basedir="."
+	 xmlns:if="ant:if"
+>
+	<description>
+		For building TrafficMAS, as well as TraaS.
+	</description>
+	<property name="TraaS" location="../TraaS"/>
+	<property name="TraaSLatest" location="${TraaS}/dist/lib/latest"/>
+	<property name="build" location="bin"/>
+	<property name="src" location="src"/>
+
+	<path id="TrafficMAS.classpath">
+		<pathelement location="lib/TraaS_sources.jar"/>
+		<pathelement location="lib/TraaS.jar"/>
+	</path>
+	
+	<target name="init">
+	    <!-- create timestamp-->
+	    <tstamp/>
+	    <mkdir dir="${build}"/>
+	</target>
+	
+	 <target name="checkforchanges">
+	 	<condition property="noTraaSCompile">
+	 		<and>
+			 	<available file="lib/TraaS.jar" property="notNeeded"/>
+			 	<uptodate property="nochanges">
+			 		<srcfiles dir="." includes="${TraaS}/**/*.java"/>
+				 	<mapper type="merge" to="lib/TraaS.jar"/>
+		 		</uptodate>
+ 			</and>		    
+		</condition>
+	 </target>
+
+ 	<target name="buildTraaS" >
+ 		<ant dir ="${TraaS}" antfile="build.xml" target="dist"  inheritAll="false"/>		
+		<copy file="${TraaSLatest}/TraaS.jar" tofile="lib/TraaS.jar"/>
+		<copy file="${TraaSLatest}/TraaS_sources.jar" tofile="lib/TraaS_sources.jar"/>
+		<ant dir ="${TraaS}" antfile="build.xml" target="clean" inheritAll="false"/>
+	</target>
+
+	<target name="build" depends="init, buildTraaS">
+		<javac debug="true" srcdir="${src}" destdir="${build}">
+			<classpath refid="TrafficMAS.classpath"/>
+		</javac>
+	</target>
+
+	<target name="clean" description="clean up" >
+	    <!-- Delete the ${build} and ${dist} directory trees -->
+	    <delete dir="${build}"/>
+		<delete dir="${Tests}/bin"/>
+	</target>
+</project>

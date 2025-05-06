@@ -1,0 +1,26 @@
+<organisations>
+    <organisation id="org1">
+        <sensors>
+            <sensor id="main_0MergeS" />
+            <sensor id="ramp_0MergeS" />
+            <sensor id="control_0MergeS" />
+            <sensor id="main_1MergeS" />
+            <sensor id="control_1MergeS" />
+        </sensors>
+        <norms>
+			<norm id="norm1" />   
+        </norms>
+    </organisation>
+       <organisation id="org2">
+        <sensors>
+            <sensor id="main1_0MergeS" />
+            <sensor id="ramp1_0MergeS" />
+            <sensor id="control1_0MergeS" />
+            <sensor id="main1_1MergeS" />
+            <sensor id="control1_1MergeS" />
+        </sensors>
+        <norms>
+			<norm id="norm2" />   
+        </norms>
+    </organisation>
+</organisations>

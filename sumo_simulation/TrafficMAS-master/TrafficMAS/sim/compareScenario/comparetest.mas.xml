@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<mas simulationlength = "10000">
+	<edges value="comparetest.edg.xml"/>
+    <nodes value="comparetest.nod.xml"/>
+    <sensors value="comparetest.sens.xml"/>
+    <norms value="comparetest.norm.xml"/>
+    <organisations value="comparetest.orgs.xml"/>
+    <routes value="comparetest.rou.xml"/>
+    <agentprofiles value="comparetest.prof.xml"/>
+    <sumoconfig value = "comparetest.cfg.xml"/>
+</mas>

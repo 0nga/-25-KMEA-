@@ -1,0 +1,8 @@
+<norm_schemes>
+  	<norm_scheme id="norm2" classname="SimpleMergeNormScheme" sanction="InfiniteFine" >
+    	<sensor id="main1_0MergeS" 	/>
+    	<sensor id="ramp1_0MergeS" 	/>
+    	<sensor id="control1_0MergeS" 	/>
+    	
+    </norm_scheme>     
+</norm_schemes>

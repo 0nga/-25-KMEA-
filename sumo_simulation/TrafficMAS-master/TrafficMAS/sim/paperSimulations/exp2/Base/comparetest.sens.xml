@@ -1,0 +1,7 @@
+<additional>
+	<laneAreaDetector id="ramp1_0MergeS" 	lane="ramp1_0" 		pos="50" 	length="100" 	freq="25" file="ramp1_0MergeSensor.txt"  />
+	<laneAreaDetector id="main1_0MergeS" 	lane="mainFront1_0"	pos="50" 	length="100" 	freq="25" file="main1_0MergeSensor.txt" />
+	<laneAreaDetector id="control1_0MergeS" lane="mainEnd1_0" 	pos="0" 	length="10" 	freq="25" file="control1_0MergeSensor.txt" />
+	<laneAreaDetector id="main1_1MergeS" 	lane="mainFront1_1"	pos="50" 	length="100" 	freq="25" file="main1_1MergeSensor.txt" />
+	<laneAreaDetector id="control1_1MergeS"	lane="mainEnd1_1" 	pos="0" 	length="10" 	freq="25" file="control1_1MergeSensor.txt" />
+</additional>

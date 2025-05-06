@@ -1,0 +1,5 @@
+<additional>
+	<laneAreaDetector id="sens1" lane="N42_0" pos="50" length="100" freq="25" file="N42_0.txt"  />
+	<laneAreaDetector id="sens2" lane="A28Tot350_0" pos="50" length="100" freq="25" file="A28Tot350_0.txt" />
+	<laneAreaDetector id="sens3" lane="A28Tot700_0" pos="0" length="10" freq="25" file="A28Tot700_0.txt" />
+</additional>

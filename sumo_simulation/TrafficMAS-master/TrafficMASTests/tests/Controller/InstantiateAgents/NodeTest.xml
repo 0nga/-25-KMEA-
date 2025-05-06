@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+    
+    <node id="A28H0" x="-350.0" y="0.0" />
+    <node id="A28H350" x="0.0" y="0.0" />
+    <node id="A28H01" x="-350.0" y="20.0" />
+    <node id="A28H3501" x="0.0" y="20.0" /> 
+</nodes>

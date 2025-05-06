@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<mas simulationlength="1000">
+    <edges value="EdgeTest.xml"/>
+    <nodes value="NodeTest.xml"/>
+    <agentprofiles value="AgentProfileTypesTest.xml"/>
+    <sumoconfig value = "ConfigTest.xml"/>
+</mas>

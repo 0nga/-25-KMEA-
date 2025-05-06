@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <input>
+        <node-files value="orgnormtest.nod.xml"/>
+        <edge-files value="orgnormtest.edg.xml"/>
+    </input>
+
+    <output>
+        <output-file value="orgnormtest.net.xml"/>
+    </output>
+
+	<building_defaults>
+		<default.speed value="100"/>	
+	</building_defaults>
+	
+	
+
+	<processing>
+		<no-internal-links value="false"/>
+	</processing>
+    
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>

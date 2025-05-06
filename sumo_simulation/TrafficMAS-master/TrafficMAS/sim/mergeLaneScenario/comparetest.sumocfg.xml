@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <input>
+        <net-file value="comparetest.net.xml"/>
+        <route-files value="comparetest.rou.xml"/>
+        <additional value="comparetest.sens.xml"/>
+    </input>
+    <gui_only>
+        <gui-settings-file value="comparetest.settings.xml"/>
+    </gui_only>
+    <!--<remote-port value="8813"/>-->
+</configuration>

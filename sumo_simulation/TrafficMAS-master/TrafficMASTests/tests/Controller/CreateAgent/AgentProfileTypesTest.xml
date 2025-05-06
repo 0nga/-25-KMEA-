@@ -1,0 +1,4 @@
+<agents multiple-routes="true">
+    <route id="route0" spawn-probability="0.01" HotShot="0.05" OldLady="0.2" Normal="0.75"/>
+    <route id="all" spawn-probability="0.01" HotShot="0.2" OldLady="0.3" Normal="0.5"/>
+</agents>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <input>
+        <node-files value="takeOverScenario.nod.xml"/>
+        <edge-files value="takeOverScenario.edg.xml"/>
+    </input>
+
+    <output>
+        <output-file value="takeOverScenario.net.xml"/>
+    </output>
+
+</configuration>

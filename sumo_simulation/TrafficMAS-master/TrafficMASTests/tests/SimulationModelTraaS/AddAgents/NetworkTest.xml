@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Fri Dec 19 09:51:07 2014 by SUMO netconvert Version 0.22.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <node-files value="NodeTest.xml"/>
+        <edge-files value="EdgeTest.xml"/>
+    </input>
+
+    <output>
+        <output-file value="NetworkTest.xml"/>
+    </output>
+
+    <processing>
+        <no-internal-links value="true"/>
+    </processing>
+
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<net version="0.13" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="350.00,0.00" convBoundary="0.00,0.00,350.00,0.00" origBoundary="-350.00,0.00,0.00,0.00" projParameter="!"/>
+
+    <edge id="A28Tot350" from="A28H0" to="A28H350" priority="2">
+        <lane id="A28Tot350_0" index="0" speed="13.90" length="350.00" shape="0.00,-4.95 350.00,-4.95"/>
+        <lane id="A28Tot350_1" index="1" speed="13.90" length="350.00" shape="0.00,-1.65 350.00,-1.65"/>
+    </edge>
+
+    <junction id="A28H0" type="unregulated" x="0.00" y="0.00" incLanes="" intLanes="" shape="-0.00,-0.05 -0.00,-6.55"/>
+    <junction id="A28H350" type="unregulated" x="350.00" y="0.00" incLanes="A28Tot350_0 A28Tot350_1" intLanes="" shape="350.00,-6.55 350.00,-0.05"/>
+
+</net>

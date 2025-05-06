@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <input>
+        <net-file value="simple.net.xml"/>
+        <route-files value="simple.rou.xml"/>
+        <additional value="simple.sensors.xml"/>
+    </input>
+
+    <gui_only>
+        <gui-settings-file value="simple.settings.xml"/>
+    </gui_only>
+
+    <!--<remote-port value="8813"/>-->
+</configuration>
+

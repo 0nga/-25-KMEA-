@@ -1,0 +1,10 @@
+<norm_schemes>
+    <norm_scheme id="norm1" classname="SimpleMergeNormScheme" sanction="LowFine" >
+    	<sensor id="main_0MergeS" 	/>
+    	<sensor id="ramp_0MergeS" 	/>
+    	<sensor id="control_0MergeS"/>
+       	<sensor id="main_1MergeS" 	/>
+       	<sensor id="control_1MergeS" 	/>
+       	
+    </norm_scheme>         
+</norm_schemes>

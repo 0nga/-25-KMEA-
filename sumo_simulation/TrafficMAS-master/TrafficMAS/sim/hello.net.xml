@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Mon Mar  9 14:28:57 2015 by SUMO netconvert Version 0.22.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <node-files value="hello.nod.xml"/>
+        <edge-files value="hello.edg.xml"/>
+    </input>
+
+    <output>
+        <output-file value="hello.net.xml"/>
+    </output>
+
+    <processing>
+        <no-internal-links value="false"/>
+    </processing>
+
+    <building_defaults>
+        <default.speed value="100"/>
+    </building_defaults>
+
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<net version="0.13" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="800.00,400.00" convBoundary="0.00,0.00,1601.00,400.00" origBoundary="-800.00,-400.00,801.00,0.00" projParameter="!"/>
+
+    <edge id=":A28H350_0" function="internal">
+        <lane id=":A28H350_0_0" index="0" speed="100.00" length="9.25" shape="793.90,394.62 802.36,398.35"/>
+    </edge>
+    <edge id=":A28H350_1" function="internal">
+        <lane id=":A28H350_1_0" index="0" speed="100.00" length="9.45" shape="792.91,398.35 802.36,398.35"/>
+    </edge>
+    <edge id=":A28H700_0" function="internal">
+        <lane id=":A28H700_0_0" index="0" speed="100.00" length="0.10" shape="1600.00,398.35 1600.00,398.35"/>
+    </edge>
+
+    <edge id="A28Tot350" from="A28H0" to="A28H350" priority="1">
+        <lane id="A28Tot350_0" index="0" speed="100.00" length="792.91" shape="0.00,398.35 792.91,398.35"/>
+    </edge>
+    <edge id="A28Tot700" from="A28H350" to="A28H700" priority="1">
+        <lane id="A28Tot700_0" index="0" speed="100.00" length="797.64" shape="802.36,398.35 1600.00,398.35"/>
+    </edge>
+    <edge id="A28TotExit" from="A28H700" to="A28Exit" priority="1">
+        <lane id="A28TotExit_0" index="0" speed="100.00" length="1.00" shape="1600.00,398.35 1601.00,398.35"/>
+    </edge>
+    <edge id="N42" from="N42Invoeg" to="A28H350" priority="1">
+        <lane id="N42_0" index="0" speed="100.00" length="798.26" shape="100.82,-1.43 793.90,394.62"/>
+    </edge>
+
+    <junction id="A28Exit" type="unregulated" x="1601.00" y="400.00" incLanes="A28TotExit_0" intLanes="" shape="1601.00,396.75 1601.00,399.95"/>
+    <junction id="A28H0" type="unregulated" x="0.00" y="400.00" incLanes="" intLanes="" shape="-0.00,399.95 -0.00,396.75"/>
+    <junction id="A28H350" type="priority" x="800.00" y="400.00" incLanes="N42_0 A28Tot350_0" intLanes=":A28H350_0_0 :A28H350_1_0" shape="802.36,399.95 802.36,396.75 794.70,393.23 793.11,396.01 792.91,396.75 792.91,399.95">
+        <request index="0" response="00" foes="10" cont="0"/>
+        <request index="1" response="01" foes="01" cont="0"/>
+    </junction>
+    <junction id="A28H700" type="priority" x="1600.00" y="400.00" incLanes="A28Tot700_0" intLanes=":A28H700_0_0" shape="1600.00,399.95 1600.00,396.75 1600.00,399.95">
+        <request index="0" response="0" foes="0" cont="0"/>
+    </junction>
+    <junction id="N42Invoeg" type="unregulated" x="100.00" y="0.00" incLanes="" intLanes="" shape="100.02,-0.04 101.61,-2.82"/>
+
+    <connection from="A28Tot350" to="A28Tot700" fromLane="0" toLane="0" via=":A28H350_1_0" dir="s" state="m"/>
+    <connection from="A28Tot700" to="A28TotExit" fromLane="0" toLane="0" via=":A28H700_0_0" dir="s" state="M"/>
+    <connection from="N42" to="A28Tot700" fromLane="0" toLane="0" via=":A28H350_0_0" dir="s" state="M"/>
+
+    <connection from=":A28H350_0" to="A28Tot700" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":A28H350_1" to="A28Tot700" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":A28H700_0" to="A28TotExit" fromLane="0" toLane="0" dir="s" state="M"/>
+
+</net>

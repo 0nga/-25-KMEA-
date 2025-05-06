@@ -1,0 +1,9 @@
+python $SUMO_HOME/tools/randomTrips.py -n test.net.xml -p 20 --persontrips -o pedestrians2.rou.xml
+
+python $SUMO_HOME/tools/randomTrips.py -n test.net.xml -p 50 --fringe-factor 100 -o cars2.rou.xml 
+
+sumo-gui --step-length 0.05 -n test.net.xml -r cars2_mod.rou.xml,pedestrians2.rou.xml --pedestrian.striping.dawdling 5
+
+sumo-gui --step-length 0.05 -n test.net.xml -r cars2_mod.rou.xml,pedestrians2.rou.xml --pedestrian.striping.dawdling 5 --remote-port 27910 --start -Q 	--collision.mingap-factor 50 --collision.check-junctions --collision.action warn
+
+sumo --step-length 0.05 -n test.net.xml -r cars2_mod.rou.xml,pedestrians2.rou.xml --pedestrian.striping.dawdling 5 --remote-port 27910 --start -Q 	--collision.mingap-factor 50 --collision.check-junctions --collision.action warn

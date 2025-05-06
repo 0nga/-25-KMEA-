@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<mas simulationlength = "1000">
+	<edges value="hello.edg.xml"/>
+    <nodes value="hello.nod.xml"/>
+    <sensors value="sensors.xml"/>
+    <norms value="hello.norms.xml"/>
+    <organisations value="hello.orgs.xml"/>
+    <routes value="hello.rou.xml"/>
+    <agentprofiles value="hello.agentprofiles.xml"/>
+    <sumoconfig value = "hello.sumocfg"/>
+</mas>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <edge from="A28H0" id="A28Tot350" to="A28H350" numLanes="1" priority="1" />
+    <edge from="N42Invoeg" id="N42" to="A28H350" numLanes="1" priority="1" />
+    <edge from="A28H350" id="A28Tot700" to="A28H700" numLanes="1" priority="1" />
+    <edge from="A28H700" id="A28TotExit" to="A28Exit" numLanes="1" priority="1"/>
+</edges>

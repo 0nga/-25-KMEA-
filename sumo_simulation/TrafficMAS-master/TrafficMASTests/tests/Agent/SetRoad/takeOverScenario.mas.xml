@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<mas simulationlength = "100">
+    <edges value="takeOverScenario.edg.xml"/>
+    <nodes value="takeOverScenario.nod.xml"/>
+    <routes value="takeOverScenario.rou.xml"/>
+    <agentprofiles value="hello.agentprofiles.xml"/>
+    <sumoconfig value = "takeOverScenario.sumocfg"/>
+</mas>

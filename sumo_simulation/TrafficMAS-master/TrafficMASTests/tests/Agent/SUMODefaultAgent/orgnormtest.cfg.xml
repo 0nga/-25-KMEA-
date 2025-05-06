@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <input>
+        <net-file value="orgnormtest.net.xml"/>
+        <route-files value="orgnormtest.rou.xml"/>
+        <additional value="orgnormtest.sens.xml"/>
+    </input>
+    <gui_only>
+        <gui-settings-file value="orgnormtest.settings.xml"/>
+    </gui_only>
+    <!--<remote-port value="8813"/>-->
+</configuration>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 03/24/15 16:09:47 by SUMO netconvert Version 0.22.0
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <node-files value="comparetest.nod.xml"/>
+        <edge-files value="comparetest.edg.xml"/>
+    </input>
+
+    <output>
+        <output-file value="comparetest.net.xml"/>
+    </output>
+
+    <processing>
+        <no-internal-links value="false"/>
+    </processing>
+
+    <building_defaults>
+        <default.speed value="42"/>
+    </building_defaults>
+
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<net version="0.13" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="2000.00,100.00" convBoundary="0.00,0.00,2351.00,100.00" origBoundary="-2000.00,-300.00,351.00,0.00" projParameter="!"/>
+
+    <edge id=":node2_0" function="internal">
+        <lane id=":node2_0_0" index="0" speed="42.00" length="2.87" shape="1998.61,98.28 2001.48,98.35"/>
+    </edge>
+    <edge id=":node2_1" function="internal">
+        <lane id=":node2_1_0" index="0" speed="42.00" length="2.88" shape="1998.60,98.35 2001.48,98.35"/>
+    </edge>
+    <edge id=":node3_0" function="internal">
+        <lane id=":node3_0_0" index="0" speed="42.00" length="0.10" shape="2350.00,98.35 2350.00,98.35"/>
+    </edge>
+
+    <edge id="exit" from="node3" to="node4" priority="1">
+        <lane id="exit_0" index="0" speed="42.00" length="1.00" shape="2350.00,98.35 2351.00,98.35"/>
+    </edge>
+    <edge id="mainEnd" from="node2" to="node3" priority="1">
+        <lane id="mainEnd_0" index="0" speed="42.00" length="348.52" shape="2001.48,98.35 2350.00,98.35"/>
+    </edge>
+    <edge id="mainFront" from="node0" to="node2" priority="1">
+        <lane id="mainFront_0" index="0" speed="42.00" length="1998.60" shape="0.00,98.35 1998.60,98.35"/>
+    </edge>
+    <edge id="ramp" from="node1" to="node2" priority="1">
+        <lane id="ramp_0" index="0" speed="42.00" length="2001.02" shape="0.08,-1.65 1998.61,98.28"/>
+    </edge>
+
+    <junction id="node0" type="unregulated" x="0.00" y="100.00" incLanes="" intLanes="" shape="-0.00,99.95 -0.00,96.75"/>
+    <junction id="node1" type="unregulated" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,-0.05 0.16,-3.25"/>
+    <junction id="node2" type="priority" x="2000.00" y="100.00" incLanes="ramp_0 mainFront_0" intLanes=":node2_0_0 :node2_1_0" shape="2001.48,99.95 2001.48,96.75 1998.69,96.68 1998.53,99.88">
+        <request index="0" response="00" foes="10" cont="0"/>
+        <request index="1" response="01" foes="01" cont="0"/>
+    </junction>
+    <junction id="node3" type="priority" x="2350.00" y="100.00" incLanes="mainEnd_0" intLanes=":node3_0_0" shape="2350.00,99.95 2350.00,96.75 2350.00,99.95">
+        <request index="0" response="0" foes="0" cont="0"/>
+    </junction>
+    <junction id="node4" type="unregulated" x="2351.00" y="100.00" incLanes="exit_0" intLanes="" shape="2351.00,96.75 2351.00,99.95"/>
+
+    <connection from="mainEnd" to="exit" fromLane="0" toLane="0" via=":node3_0_0" dir="s" state="M"/>
+    <connection from="mainFront" to="mainEnd" fromLane="0" toLane="0" via=":node2_1_0" dir="s" state="m"/>
+    <connection from="ramp" to="mainEnd" fromLane="0" toLane="0" via=":node2_0_0" dir="s" state="M"/>
+
+    <connection from=":node2_0" to="mainEnd" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":node2_1" to="mainEnd" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":node3_0" to="exit" fromLane="0" toLane="0" dir="s" state="M"/>
+
+</net>

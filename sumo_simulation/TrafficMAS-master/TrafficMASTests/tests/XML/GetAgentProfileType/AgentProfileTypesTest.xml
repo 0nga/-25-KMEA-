@@ -1,0 +1,5 @@
+<agents spawn-probability ="0.01">
+	<agent role="HotShot" dist="0.05"/>
+	<agent role="OldLady" dist="0.2"/>
+	<agent role="Normal" dist="0.75"/>
+</agents>

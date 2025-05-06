@@ -1,0 +1,6 @@
+<connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo-sim.org/xsd/connections_file.xsd">
+	
+	<connection from="mainFront" to="mainEnd" fromLane="1" toLane="0"/>
+	<!--  <connection from="mainFront" to="mainEnd" fromLane="2" toLane="1"/>-->
+	
+</connections>

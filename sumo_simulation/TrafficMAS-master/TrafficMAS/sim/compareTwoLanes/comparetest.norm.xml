@@ -1,0 +1,11 @@
+<norm_schemes>
+    <norm_scheme id="norm1" classname="MergeNormScheme" sanction="LowFine" >
+    	<sensor id="mainMergeS" 	/>
+    	<sensor id="rampMergeS" 	/>
+    	<sensor id="controlMergeS" 	/>
+    </norm_scheme>     
+    <norm_scheme id="norm2" classname="StayInLaneNormScheme" sanction="LowFine" >
+    	<sensor id="mainStayS" />
+    	<sensor id="rampStayS" />
+    </norm_scheme>
+</norm_schemes>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+  <vType id="Car" accel="1.0" decel="5.0" length="5.0" minGap="2.0" maxSpeed="70.0" sigma="0" />
+  
+   <route id="route0" color="1,1,0" edges="A28Tot350"  spawn-probability="1.0"/>
+   <route id="route1" color="1,1,0" edges="A28Tot3501" spawn-probability="1.0"/>
+   <route id="route2" color="1,1,0" edges="A28Tot3502" spawn-probability="1.0"/>
+   <route id="route3" color="1,1,0" edges="A28Tot3503" spawn-probability="1.0"/>
+   <route id="route4" color="1,1,0" edges="A28Tot3504" spawn-probability="1.0"/>
+   <route id="route5" color="1,1,0" edges="A28Tot3505" spawn-probability="1.0"/>  
+   <route id="route6" color="1,1,0" edges="A28Tot3506"  spawn-probability="1.0"/>
+   <route id="route7" color="1,1,0" edges="A28Tot3507" spawn-probability="1.0"/>
+   <route id="route8" color="1,1,0" edges="A28Tot3508" spawn-probability="1.0"/>
+   <route id="route9" color="1,1,0" edges="A28Tot3509" spawn-probability="1.0"/>
+   <route id="route10" color="1,1,0" edges="A28Tot35010" spawn-probability="1.0"/>
+   <route id="route11" color="1,1,0" edges="A28Tot35011" spawn-probability="1.0"/>
+   <route id="route12" color="1,1,0" edges="A28Tot35012" spawn-probability="1.0"/>
+   <route id="route13" color="1,1,0" edges="A28Tot35013" spawn-probability="1.0"/>
+   <route id="route14" color="1,1,0" edges="A28Tot35014" spawn-probability="1.0"/>
+   <route id="route15" color="1,1,0" edges="A28Tot35015" spawn-probability="1.0"/>
+   <route id="route16" color="1,1,0" edges="A28Tot35016" spawn-probability="1.0"/>
+   <route id="route17" color="1,1,0" edges="A28Tot35017" spawn-probability="1.0"/>
+   <route id="route18" color="1,1,0" edges="A28Tot35018" spawn-probability="1.0"/>
+   <route id="route19" color="1,1,0" edges="A28Tot35019" spawn-probability="1.0"/>
+   <route id="route20" color="1,1,0" edges="A28Tot35020" spawn-probability="1.0"/>
+   <route id="route21" color="1,1,0" edges="A28Tot35021" spawn-probability="1.0"/>
+   <route id="route22" color="1,1,0" edges="A28Tot35022" spawn-probability="1.0"/>
+   <route id="route23" color="1,1,0" edges="A28Tot35023" spawn-probability="1.0"/>
+   <route id="route24" color="1,1,0" edges="A28Tot35024" spawn-probability="1.0"/>
+   <route id="route25" color="1,1,0" edges="A28Tot35025" spawn-probability="1.0"/>
+   <route id="route26" color="1,1,0" edges="A28Tot35026" spawn-probability="1.0"/>
+   <route id="route27" color="1,1,0" edges="A28Tot35027" spawn-probability="1.0"/>
+   <route id="route28" color="1,1,0" edges="A28Tot35028" spawn-probability="1.0"/>
+   <route id="route29" color="1,1,0" edges="A28Tot35029" spawn-probability="1.0"/>
+   <route id="route30" color="1,1,0" edges="A28Tot35030" spawn-probability="1.0"/>
+   <route id="route31" color="1,1,0" edges="A28Tot35031" spawn-probability="1.0"/>
+   <route id="route32" color="1,1,0" edges="A28Tot35032" spawn-probability="1.0"/>
+   <route id="route33" color="1,1,0" edges="A28Tot35033" spawn-probability="1.0"/>
+   <route id="route34" color="1,1,0" edges="A28Tot35034" spawn-probability="1.0"/>
+   <route id="route35" color="1,1,0" edges="A28Tot35035" spawn-probability="1.0"/>
+   <route id="route36" color="1,1,0" edges="A28Tot35036" spawn-probability="1.0"/>
+   <route id="route37" color="1,1,0" edges="A28Tot35037" spawn-probability="1.0"/>
+   <route id="route38" color="1,1,0" edges="A28Tot35038" spawn-probability="1.0"/>
+   <route id="route39" color="1,1,0" edges="A28Tot35039" spawn-probability="1.0"/>
+   <route id="route40" color="1,1,0" edges="A28Tot35040" spawn-probability="1.0"/>
+</routes>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<mas simulationlength = "100">
+	<edges value="orgnormtest.edg.xml"/>
+    <nodes value="orgnormtest.nod.xml"/>
+    <sensors value="orgnormtest.sens.xml"/>
+    <norms value="orgnormtest.norm.xml"/>
+    <organisations value="orgnormtest.orgs.xml"/>
+    <routes value="orgnormtest.rou.xml"/>
+    <agentprofiles value="orgnormtest.prof.xml"/>
+    <sumoconfig value = "orgnormtest.cfg.xml"/>
+</mas>

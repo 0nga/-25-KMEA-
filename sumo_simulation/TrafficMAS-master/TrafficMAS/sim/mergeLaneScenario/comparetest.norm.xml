@@ -1,0 +1,13 @@
+<norm_schemes>
+    <norm_scheme id="norm1" classname="RealMergeNormScheme" sanction="HighFine" >
+    	<sensor id="sens2" />
+    	<sensor id="sens1" />
+    	<sensor id="sens3" />
+    	<sensor id="sens4" />
+    <!--<sensor id="sens5" />-->
+    </norm_scheme> 
+    <norm_scheme id="norm2" classname="MergeLaneNormScheme" sanction="HighFine" >
+    	<sensor id="sens4" />
+    </norm_scheme> 
+    
+</norm_schemes>

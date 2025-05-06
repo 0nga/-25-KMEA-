@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <input>
+        <net-file value="NetworkTest.xml"/>
+        <route-files value="RouteTest2.xml"/>
+    </input>
+	<time>
+        <begin value="0"/>
+        <end value="700"/>
+    </time>
+    <gui_only>
+        <gui-settings-file value="SettingsTest.xml"/>
+    </gui_only>
+
+    <!--<remote-port value="8813"/>-->
+</configuration>
+

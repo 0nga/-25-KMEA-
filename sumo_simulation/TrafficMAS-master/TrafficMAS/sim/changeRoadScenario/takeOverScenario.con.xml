@@ -1,0 +1,6 @@
+<connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >	
+	<connection from="edge0" to="edge1" fromLane="0" toLane="0"/>
+	<connection from="edge0" to="edge3" fromLane="0" toLane="0"/>
+	<connection from="edge1" to="edge2" fromLane="0" toLane="0"/>
+</connections>
+

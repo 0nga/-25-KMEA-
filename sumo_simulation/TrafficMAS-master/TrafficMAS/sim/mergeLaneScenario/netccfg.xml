@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <input>
+        <node-files 		value="comparetest.nod.xml"/>
+        <edge-files 		value="comparetest.edg.xml"/>
+        <connection-files 	value="comparetest.con.xml"/>
+    </input>
+
+    <output>
+        <output-file value="comparetest.net.xml"/>
+    </output>
+
+	<building_defaults>
+		<default.speed value="42"/>	
+	</building_defaults>
+
+	<processing>
+		<no-internal-links value="false"/>
+	</processing>
+    
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>

@@ -1,0 +1,100 @@
+<project name="TrafficMAS" default="buildAll" basedir=".">
+	<description>
+		For building TrafficMAS, as well as TraaS.
+	</description>
+	<property name="MAS" location="./TrafficMAS"/>
+	<property name="Tests" location="./TrafficMASTests"/>
+	
+	<property name="buildMAS" location="${MAS}/bin"/>
+	<property name="srcMAS" location="${MAS}/src"/>
+	<property name="libMAS" location="${MAS}/lib"/>
+	
+	<property name="srcTests" location="${Tests}/src"/>
+	<property name="outputTests" location="${Tests}/output"/>
+	<property name="libTests" location="${Tests}/lib"/>
+	
+	<target name="initMAS">
+	    <!-- create timestamp-->
+	    <tstamp/>
+	    <mkdir dir="${buildMAS}"/>
+	</target>
+	
+	<target name="initTraaS">
+	    <!-- create timestamp-->
+	    <tstamp/>
+	</target>
+	
+	<target name="initTests">
+	    <!-- create timestamp-->
+	    <tstamp/>
+	    <mkdir dir="${outputTests}"/>
+	</target>
+	
+	<path id="TrafficMAS.classpath">
+        <pathelement location="${libMAS}/TraaS_javadoc.jar"/>
+        <pathelement location="${libMAS}/TraaS_sources.jar"/>
+        <pathelement location="${libMAS}/TraaS.jar"/>
+        <pathelement location="${buildMAS}"/>
+    </path>
+    
+    <path id="TrafficMASTests.classpath">
+        <pathelement location="${libTests}/TraaS_javadoc.jar"/>
+        <pathelement location="${libTests}/TraaS_sources.jar"/>
+        <pathelement location="${libTests}/TraaS.jar"/>
+        <pathelement location="${Tests}/lib/junit.jar"/>
+        <pathelement location="${Tests}/lib/hamcrest-core.jar"/>
+        <pathelement location="${buildMAS}"/>
+    </path>
+    
+	<target name="buildMAS" depends="initMAS">
+	    <javac debug="true" srcdir="${srcMAS}" destdir="${buildMAS}">
+	        <classpath refid="TrafficMAS.classpath"/>
+	    </javac>
+	</target>
+	
+    <target name="buildTraaS" depends="initTraaS">
+	    <ant dir ="./TraaS" antfile="build.xml" target="dist"  inheritAll="false"/>		
+		<copy file="./TraaS/dist/lib/latest/TraaS.jar" tofile="${libMAS}/TraaS.jar"/>
+		<copy file="./TraaS/dist/lib/latest/TraaS_sources.jar" tofile="${libMAS}/TraaS_sources.jar"/>
+		<copy file="./TraaS/dist/lib/latest/TraaS.jar" tofile="${libTests}/TraaS.jar"/>
+		<copy file="./TraaS/dist/lib/latest/TraaS_sources.jar" tofile="${libTests}/TraaS_sources.jar"/>
+		<ant dir ="./TraaS" antfile="build.xml" target="clean"  inheritAll="false"/>
+	</target>
+
+	<target name="buildTests" depends="initTests">
+	    <javac debug="true" srcdir="${srcTests}" destdir="${buildMAS}">
+	        <classpath refid="TrafficMASTests.classpath"/>
+	    </javac>
+	</target>
+		
+	<target name="buildAll" depends="buildTraaS,buildMAS,buildTests"/>
+	<target name="run" depends="buildMAS">
+	    <java classname="TrafficMAS">
+	        <arg value="${MAS}/sim/"/>
+	        <arg value="hello.mas.xml"/>
+	        <arg value="sumo"/>
+			<arg value="hello.sumocfg"/>
+            <arg value="1337"/>
+	        <classpath refid="TrafficMASTests.classpath"/>
+	    </java>
+	</target>
+		
+	<target name="test" depends="buildAll">
+	    <junit fork="yes" printsummary="yes" haltonfailure="yes">
+            <jvmarg value="-Duser.dir=${Tests}"/>
+            <formatter type="plain"/>
+            <classpath refid="TrafficMASTests.classpath"/>
+            <batchtest fork="yes" todir="${outputTests}">
+                <fileset dir="${srcTests}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+	</target>
+	
+	<target name="clean" description="clean up" >
+	    <!-- Delete the ${build} and ${dist} directory trees -->
+	    <delete dir="${buildMAS}"/>
+		<delete dir="${Tests}/bin"/>
+  </target>
+</project>

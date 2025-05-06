@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <edge from="node0" 	id="mainFront" 	to="node2" numLanes="2" priority="1"/>
+    <edge from="node1" 	id="ramp" 		to="node2" numLanes="1" priority="1"/>
+    <edge from="node2" 	id="mainEnd" 	to="node3" numLanes="2" priority="1"/>
+    <edge from="node3" 	id="exit" 		to="node4" numLanes="2" priority="1"/>
+	
+</edges>

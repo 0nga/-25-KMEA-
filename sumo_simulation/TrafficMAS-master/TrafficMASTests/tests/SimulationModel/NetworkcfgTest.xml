@@ -1,0 +1,17 @@
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <input>
+        <node-files value="NodeTest.xml"/>
+        <edge-files value="EdgeTest.xml"/>
+    </input>
+
+    <output>
+        <output-file value="NetworkTest.xml"/>
+    </output>
+	
+    <report>
+        <verbose value="true"/>
+    </report>
+
+
+</configuration>

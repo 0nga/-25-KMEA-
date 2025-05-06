@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+  <vType id="Car" accel="1.0" decel="3.0" length="5.0" minGap="4" maxSpeed="70.0" sigma="0" />
+  
+   <route id="route0" color="1,1,0" edges="mainFront mainEnd mainFront1 mainEnd1 exit1"	/>
+   
+</routes>

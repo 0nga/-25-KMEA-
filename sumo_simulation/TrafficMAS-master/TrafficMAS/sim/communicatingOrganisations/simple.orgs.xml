@@ -1,0 +1,20 @@
+<organisations>
+	<organisation id="org1">
+	        <sensors>
+	            <sensor id="A28_350_lane0_s1" />   
+	        </sensors>
+	    </organisation>
+    <organisation id="org2">
+        <sensors>
+            <sensor id="A28_700_lane0_s1" />
+            <sensor id="A28_700_lane0_s2" />
+        </sensors>
+        <norms>
+            <norm id="maxspeed">         
+            </norm>
+        </norms>
+        <observes>
+        	<observed id="org1"></observed>
+        </observes>
+    </organisation>
+</organisations>

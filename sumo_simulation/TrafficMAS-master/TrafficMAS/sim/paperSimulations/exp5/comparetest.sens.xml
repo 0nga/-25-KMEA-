@@ -1,0 +1,11 @@
+<additional>
+	<laneAreaDetector id="sens1" lane="mainFront_0" pos="50" 	length="100" 	freq="25" file="1.txt" />
+	<laneAreaDetector id="sens2" lane="mainFront_1" pos="50" 	length="100" 	freq="25" file="2.txt" />
+	<laneAreaDetector id="sens3" lane="mainEnd_0" 	pos="0" 	length="10" 	freq="25" file="3.txt" />
+	<laneAreaDetector id="sens4" lane="mainEnd_1" 	pos="0" 	length="10" 	freq="25" file="4.txt" />
+	
+	<laneAreaDetector id="sens5" lane="mainFront1_0" pos="50" 	length="100" 	freq="25" file="5.txt" />
+	<laneAreaDetector id="sens6" lane="mainFront1_1" pos="50" 	length="100" 	freq="25" file="6.txt" />
+	<laneAreaDetector id="sens7" lane="mainEnd1_0" 	 pos="0" 	length="10" 	freq="25" file="7.txt" />
+	<laneAreaDetector id="sens8" lane="mainEnd1_1" 	 pos="0" 	length="10" 	freq="25" file="8.txt" />
+</additional>

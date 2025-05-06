@@ -1,0 +1,11 @@
+<organisations>
+    <organisation id="org1">
+        <sensors>
+            <sensor id="A28_350_lane0_0" />
+    		<sensor id="N42lane0" />
+        </sensors>
+        <norms>
+            <norm id="maxspeed" />
+        </norms>
+    </organisation>
+</organisations>

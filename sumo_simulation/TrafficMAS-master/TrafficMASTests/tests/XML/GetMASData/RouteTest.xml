@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+  <vType id="Car" accel="1.0" decel="5.0" length="5.0" minGap="2.0" maxSpeed="70.0" sigma="0" />
+  
+   <route id="route0" color="1,1,0" edges="A28Tot350"  spawn-probability="0.4"/>
+   <route id="route1" color="1,1,0" edges="A28Tot3501" spawn-probability="1.0"/>
+   <route id="route2" color="1,1,0" edges="A28Tot3502" spawn-probability="1.0"/>
+   <route id="route3" color="1,1,0" edges="A28Tot3503" spawn-probability="1.0"/>
+   <route id="route4" color="1,1,0" edges="A28Tot3504" spawn-probability="1.0"/>
+   <route id="route5" color="1,1,0" edges="A28Tot3505" spawn-probability="1.0"/>
+</routes>

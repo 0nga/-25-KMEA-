@@ -1,0 +1,6 @@
+<connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo-sim.org/xsd/connections_file.xsd">
+	
+	<connection from="A28Tot350" to="A28Tot700" fromLane="0" toLane="0"/>
+	<connection from="N42" to="A28Tot700" fromLane="0" toLane="0"/>
+	
+</connections>

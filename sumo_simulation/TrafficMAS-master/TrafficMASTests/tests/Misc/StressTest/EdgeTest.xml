@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <edge from="A28H0" id="A28Tot350" to="A28H350" numLanes="4" priority="2" />
+    <edge from="A28H01" id="A28Tot3501" to="A28H3501" numLanes="4" priority="2" />
+    <edge from="A28H02" id="A28Tot3502" to="A28H3502" numLanes="4" priority="2" />
+    <edge from="A28H03" id="A28Tot3503" to="A28H3503" numLanes="4" priority="2" />
+    <edge from="A28H04" id="A28Tot3504" to="A28H3504" numLanes="4" priority="2" />
+    <edge from="A28H05" id="A28Tot3505" to="A28H3505" numLanes="4" priority="2" />
+    <edge from="A28H06" id="A28Tot3506" to="A28H3506" numLanes="4" priority="2" />
+    <edge from="A28H07" id="A28Tot3507" to="A28H3507" numLanes="4" priority="2" />
+    <edge from="A28H08" id="A28Tot3508" to="A28H3508" numLanes="4" priority="2" />
+    <edge from="A28H09" id="A28Tot3509" to="A28H3509" numLanes="4" priority="2" />
+    <edge from="A28H010" id="A28Tot35010" to="A28H35010" numLanes="4" priority="2" />
+    <edge from="A28H011" id="A28Tot35011" to="A28H35011" numLanes="4" priority="2" />	
+    <edge from="A28H012" id="A28Tot35012" to="A28H35012" numLanes="4" priority="2" />
+    <edge from="A28H013" id="A28Tot35013" to="A28H35013" numLanes="4" priority="2" />
+    <edge from="A28H014" id="A28Tot35014" to="A28H35014" numLanes="4" priority="2" />
+    <edge from="A28H015" id="A28Tot35015" to="A28H35015" numLanes="4" priority="2" />
+    <edge from="A28H016" id="A28Tot35016" to="A28H35016" numLanes="4" priority="2" />
+    <edge from="A28H017" id="A28Tot35017" to="A28H35017" numLanes="4" priority="2" />
+    <edge from="A28H018" id="A28Tot35018" to="A28H35018" numLanes="4" priority="2" />
+    <edge from="A28H019" id="A28Tot35019" to="A28H35019" numLanes="4" priority="2" />
+    <edge from="A28H020" id="A28Tot35020" to="A28H35020" numLanes="4" priority="2" />
+    <edge from="A28H021" id="A28Tot35021" to="A28H35021" numLanes="4" priority="2" />
+    <edge from="A28H022" id="A28Tot35022" to="A28H35022" numLanes="4" priority="2" />
+    <edge from="A28H023" id="A28Tot35023" to="A28H35023" numLanes="4" priority="2" />
+    <edge from="A28H024" id="A28Tot35024" to="A28H35024" numLanes="4" priority="2" />
+    <edge from="A28H025" id="A28Tot35025" to="A28H35025" numLanes="4" priority="2" />
+    <edge from="A28H026" id="A28Tot35026" to="A28H35026" numLanes="4" priority="2" />
+    <edge from="A28H027" id="A28Tot35027" to="A28H35027" numLanes="4" priority="2" />
+    <edge from="A28H028" id="A28Tot35028" to="A28H35028" numLanes="4" priority="2" />
+    <edge from="A28H029" id="A28Tot35029" to="A28H35029" numLanes="4" priority="2" />
+    <edge from="A28H030" id="A28Tot35030" to="A28H35030" numLanes="4" priority="2" />
+    <edge from="A28H031" id="A28Tot35031" to="A28H35031" numLanes="4" priority="2" />
+    <edge from="A28H032" id="A28Tot35032" to="A28H35032" numLanes="4" priority="2" />
+    <edge from="A28H033" id="A28Tot35033" to="A28H35033" numLanes="4" priority="2" />
+    <edge from="A28H034" id="A28Tot35034" to="A28H35034" numLanes="4" priority="2" />
+    <edge from="A28H035" id="A28Tot35035" to="A28H35035" numLanes="4" priority="2" />
+    <edge from="A28H036" id="A28Tot35036" to="A28H35036" numLanes="4" priority="2" />
+    <edge from="A28H037" id="A28Tot35037" to="A28H35037" numLanes="4" priority="2" />
+    <edge from="A28H038" id="A28Tot35038" to="A28H35038" numLanes="4" priority="2" />
+    <edge from="A28H039" id="A28Tot35039" to="A28H35039" numLanes="4" priority="2" />
+    <edge from="A28H040" id="A28Tot35040" to="A28H35040" numLanes="4" priority="2" />
+</edges>
