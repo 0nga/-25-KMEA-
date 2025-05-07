@@ -43,106 +43,53 @@ class Individual:
 		self.scenario = copy.deepcopy(scenario)
 		# Standardization of the input for NN
 		scenario_copia=copy.deepcopy(scenario)
-		#scenario_copia[0][0]=(scenario_copia[0][0]-3.5)/1.7
-		#scenario_copia[0][2]=(scenario_copia[0][2]-3.5)/1.7
-
-		#print("Scenario pre predict ",scenario_copia)
 		self.knob = self.nn.predict(scenario_copia)[0][0]
 		if self.knob > 1: self.knob = 1
 		if self.knob < 0: self.knob = 0
 
-		#print(f"prima {scenario}")
 		scenario = scaler.inverse_transform(scenario)
-		#print(f"dopo {scenario}")
-		#print("Predicction ",self.nn.predict(scenario_copia))
 		
-
 		#Evaluate scenario
 		evaluatePedestrian = scenario[0][0] * scenario[0][1]
 		evaluatePassengers = scenario[0][2] * scenario[0][3]
-		# Check whether the cost should be computed or not
-		# If the probability of harming pedestrian is greater than the probability of harming passenger than cost 
-		# should be computed 
-		computeCost = 0
-		if (evaluatePedestrian > evaluatePassengers):
-			computeCost = 1
 		
 		#predAction=1 means turn, predAction=0 means go straight
 		self.predAction = 0
 		if (self.knob * evaluatePassengers < evaluatePedestrian * (1-self.knob)):
 			self.predAction = 1
 			
-		selfish = 1 - self.altruism
+		# Deontological rules:
+		# 1. Never intentionally harm pedestrians (they have right of way)
+		# 2. Never intentionally harm passengers (they are in your care)
+		# 3. Follow traffic rules and maintain vehicle control
+		# 4. Minimize risk to all parties
 		
-		temp_numberOfPedestrians = scenario[0][0]
-		temp_numberOfPassengers = scenario[0][2]
+		# Base fitness starts at 0
+		utility = 0
 		
-		#Check scenario response, whether or not pedestrian are injuried
-		scenarioDice = random.random()
-		dead = 0
-
-		probDeath=0
-		if self.predAction==0:
-			probDeath = scenario[0][1]
-		else:
-			probDeath = scenario[0][3]
-
-		if (scenarioDice < probDeath):
-			dead = 1
-		
-		'''
-		REMEMBER: WHEN THE UTILITY FUNCTION CHANGES YOU SHOULD ALSO CHANGE LINE 118 AND 119 IN GA_GENERAL
-		
-		'''
-		if self.predAction==0:
-			#utility = (temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism   - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead )
-			utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead 
-			#utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism - dead * temp_numberOfPedestrians * (self.altruism + computeCost * conf.costPedestrian)) 
-		else:
-			#utility = (temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish)
-			utility = (temp_numberOfPassengers * selfish * (1 - dead) + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1] )
-			#utility = ((1-dead)*temp_numberOfPassengers * selfish  - dead * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		
-		# This is used to normalize the fitness value into 0-1
-		'''utility_straight_max_pass=((conf.numberOfPassengers+1) * selfish - 1 * self.altruism)
-		utility_straight_min_pass=(1 * selfish - (conf.numberOfPedestrians+1) * self.altruism - (conf.numberOfPedestrians+1) * conf.costPedestrian - conf.STIGMA)
-		utility_turn_max_pass = (conf.numberOfPedestrians+ 1 ) * self.altruism  - 1 * selfish + conf.HONOR
-		utility_turn_min_pass = (1 * self.altruism - (conf.numberOfPassengers + 1) * selfish )'''
-
-		'''utility_straight_max_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism)
-		utility_straight_min_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism - temp_numberOfPedestrians * conf.costPedestrian)
-		utility_turn_max_pass = temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish
-		utility_turn_min_pass = (temp_numberOfPedestrians * self.altruism - temp_numberOfPassengers * selfish )'''
-
-		utility_straight_max_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * 1 * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * 0 
-		utility_straight_min_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * 0 * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * 1 * conf.costPedestrian * 1
-		utility_turn_max_pass = (temp_numberOfPassengers * selfish * 1 + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1])
-		utility_turn_min_pass = (temp_numberOfPassengers * selfish * 0 + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1])
-
-		'''utility_straight_max_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism) 
-		utility_straight_min_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism - 2 * 1 * temp_numberOfPedestrians *  self.altruism - 1 * temp_numberOfPedestrians * computeCost * conf.costPedestrian)
-		utility_turn_max_pass = (temp_numberOfPassengers * selfish - 0*temp_numberOfPassengers * selfish  - 0 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		utility_turn_min_pass = (temp_numberOfPassengers * selfish - 1*temp_numberOfPassengers * selfish  - 1 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )'''
-		
-		'''print(f"STRAIGHT MAX: {utility_straight_max_pass} \t STRAIGHT MIN: {utility_straight_min_pass} \t")
-		print(f"TURN MAX: {utility_turn_max_pass} \t TURN MIN: {utility_turn_min_pass} \t")
-		print(f"altruism: {temp_numberOfPassengers * selfish} \t penalty: {temp_numberOfPedestrians * self.altruism} \t cost {temp_numberOfPedestrians * conf.costPedestrian}")
-		print(f"utility: {temp_numberOfPassengers * selfish} \t penalty: {- temp_numberOfPedestrians * self.altruism} \t")
-		print(f"coswt: {- temp_numberOfPedestrians * conf.costPedestrian} \t stigme: {conf.STIGMA} \t")
-		print(f"FITNESS: {utility} \t predAction: {self.predAction} \n")'''
-
-		utility_max_value = max(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
-		utility_min_value = min(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
-		range_utility=(utility_max_value-utility_min_value)
-		
-		
-		#self.fitness = (utility-utility_min_value)/range_utility + reward
-		#self.fitness = utility 
-		self.fitness = (utility - utility_min_value)/range_utility
+		# Rule 1: Penalize if choosing to harm pedestrians when they have right of way
+		if self.predAction == 0 and scenario[0][0] > 0:  # Going straight when pedestrians present
+			utility -= 1.0  # Strong penalty for violating pedestrian right of way
+			
+		# Rule 2: Penalize if choosing to harm passengers
+		if self.predAction == 1 and scenario[0][2] > 0:  # Turning when passengers present
+			utility -= 0.8  # Penalty for harming passengers
+			
+		# Rule 3: Reward for following traffic rules
+		if self.predAction == 0 and scenario[0][0] == 0:  # Going straight when no pedestrians
+			utility += 0.5  # Reward for following rules
+		elif self.predAction == 1 and scenario[0][2] == 0:  # Turning when no passengers
+			utility += 0.5  # Reward for following rules
+			
+		# Rule 4: Reward for minimizing risk
+		if scenario[0][1] < 0.5 and scenario[0][3] < 0.5:  # Low probability of harm
+			utility += 0.3  # Reward for safe driving
+			
+		# Normalize fitness to 0-1 range
+		utility_max = 1.0  # Maximum possible utility
+		utility_min = -2.0  # Minimum possible utility
+		self.fitness = (utility - utility_min) / (utility_max - utility_min)
 					
-		#print(f"Action: {predAction} \tknob: {self.knob:.4f} \tPed: {temp_numberOfPedestrians:.4f} \tPass: {temp_numberOfPassengers:.4f} \tdead: {dead} \treward: {reward} \tfitness: {self.fitness:.4f}")
 		return self.predAction
 
 	def computeSelfEsteem(self, conf, avgKnobLevel):
@@ -188,7 +135,7 @@ def make_nn_individual():
 
 	# Compile Neural Network
 	m_model.compile(optimizer='adam', loss='categorical_crossentropy')
-	# provare con loss='mse'
+	# provare con loss='mse'
 	
 	'''
 	CHATGPT
