@@ -3,23 +3,21 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix,precision_score, recall_score, f1_score
 import argparse
 
 def setup_output_directory(script_dir):
-    """Crea e restituisce la directory per l'output dei grafici."""
     output_dir = os.path.join(script_dir, "grafici")
     os.makedirs(output_dir, exist_ok=True)
     return output_dir
 
 def read_parameters(path, max_gen=None):
-    """Legge i parametri da out.txt nella cartella outputTest"""
     params = {
         'altruismLevel': -1,
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 50,
+        'max_gen': 50,  # Default value for max_gen
         'pop_size': 100
     }
 
@@ -43,9 +41,14 @@ def read_parameters(path, max_gen=None):
                 continue
 
     if max_gen is not None:
-        params['max_gen'] = max_gen
+        params['max_gen'] = max_gen  # Override with the value passed via command line
 
     return params
+
+def get_log_path(base_path, generation):
+    s = f"{generation:03d}"
+    migliaia = generation // 1000
+    return os.path.join(base_path, "logs", str(migliaia), f"gen_{s}.txt")
 
 def plot_max_fitness(path, output_dir, params):
     sns.set(style="darkgrid")
@@ -53,9 +56,7 @@ def plot_max_fitness(path, output_dir, params):
     avgFitness = pd.DataFrame([])
 
     for i in range(params['max_gen']):
-        s = "%03d" % i
-        migliaia = int(i / 1000)
-        filepath = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
+        filepath = get_log_path(path, i)
         l = pd.read_csv(filepath, delimiter="\t", decimal=",")
         l["type"] = i
 
@@ -85,9 +86,7 @@ def plot_mean_fitness(path, output_dir, params):
     avgFitness = pd.DataFrame([])
 
     for i in range(params['max_gen']):
-        s = "%03d" % i
-        migliaia = int(i / 1000)
-        log_path = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
+        log_path = get_log_path(path, i)
         l = pd.read_csv(log_path, delimiter="\t", decimal=",")
         l["type"] = i
         avgFitness = pd.concat([avgFitness, l], ignore_index=True)
@@ -98,7 +97,6 @@ def plot_mean_fitness(path, output_dir, params):
     ax = sns.lineplot(x="type", y="AltruismLevel", data=avgFitness, 
                      label=f"selfish: {1 - altruism_value}")
     ax.set(xlabel='Generation', ylabel='AltruismLevel')
-    plt.ylim(0, 1.0)
     plt.title(title)
 
     filename = f"altruism_probPed_{params['probPed']}_costPed_{params['costPed']}.png"
@@ -111,9 +109,7 @@ def plot_accuracy(path, output_dir, params):
     tp_list, tn_list, fp_list, fn_list = [], [], [], []
 
     for i in range(params['max_gen']):
-        s = f"{i:03d}"
-        migliaia = i // 1000
-        gen_path = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
+        gen_path = get_log_path(path, i)
 
         try:
             l = pd.read_csv(gen_path, delimiter="\t", decimal=",")
@@ -200,22 +196,138 @@ def plot_accuracy(path, output_dir, params):
     plt.savefig(os.path.join(output_dir, f"accuracy_curve_altruism2_{params['altruismLevel']}.png"))
     plt.close()
 
-def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Prepare lists for true and predicted labels
+    y_true = []
+    y_pred = []
 
-    parser = argparse.ArgumentParser(description='Genera i grafici per il risultato del GA')
-    parser.add_argument('-g', '--generations', type=int, help='Numero di generazioni da elaborare (sovrascrive out.txt)')
+    for i in range(params['max_gen']):
+        gen_path = get_log_path(path, i)
+
+        try:
+            l = pd.read_csv(gen_path, delimiter="\t", decimal=",")
+            l["type"] = i
+
+            # True labels
+            y_true.extend(l.convieneSvolta.astype(int))  # Assuming 'convieneSvolta' is the true label
+            # Predicted labels
+            y_pred.extend(l.predAction.astype(int))  # Assuming 'predAction' is the predicted label
+
+        except Exception as e:
+            print(f"Errore alla generazione {i}: {e}")
+
+    # Compute confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+
+    # Plot confusion matrix
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'])
+    plt.title(f"Confusion Matrix (Altruism Level: {params['altruismLevel']})")
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f"confusion_matrix_{params['altruismLevel']}.png"))
+    plt.close()
+
+
+def plot_classification_metrics(path, output_dir, params):
+    precision_list = []
+    recall_list = []
+    f1_list = []
+    f2_list = []
+
+    for i in range(params['max_gen']):
+        gen_path = get_log_path(path, i)
+        try:
+            l = pd.read_csv(gen_path, delimiter="\t", decimal=",")
+            y_true = l.convieneSvolta.astype(int)
+            y_pred = l.predAction.astype(int)
+
+            precision = precision_score(y_true, y_pred, zero_division=0)
+            recall = recall_score(y_true, y_pred, zero_division=0)
+            f1 = f1_score(y_true, y_pred, zero_division=0)
+            f2 = (5 * precision * recall) / (4 * precision + recall) if (precision + recall) > 0 else 0
+
+            precision_list.append({'generation': i, 'precision': precision})
+            recall_list.append({'generation': i, 'recall': recall})
+            f1_list.append({'generation': i, 'f1_score': f1})
+            f2_list.append({'generation': i, 'f2_score': f2})
+
+        except Exception as e:
+            print(f"Errore alla generazione {i}: {e}")
+
+    altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
+    title = f"Death Pedestrian: {params['probPed']} selfish: {1 - altruism_value}"
+
+    def plot_metric(data_list, metric_name, ylabel):
+        df = pd.DataFrame(data_list)
+        df.generation = df.generation.astype('float64')
+        df[metric_name] = df[metric_name].astype('float64')
+
+        plt.figure(figsize=(8, 8))
+        ax = sns.regplot(
+            x="generation",
+            y=metric_name,
+            data=df,
+            scatter=True,
+            label=f"selfish: {1 - altruism_value}"
+        )
+        ax.legend(loc=4)
+        ax.set(xlabel='Generation', ylabel=ylabel)
+        plt.title(title)
+        plt.savefig(os.path.join(output_dir, f"{metric_name}_curve_altruism_{params['altruismLevel']}.png"))
+        plt.close()
+
+    plot_metric(precision_list, 'precision', 'Precision')
+    plot_metric(recall_list, 'recall', 'Recall')
+    plot_metric(f1_list, 'f1_score', 'F1 Score')
+    plot_metric(f2_list, 'f2_score', 'F2 Score')
+
+def plot_confusion_matrix_last_generation(path, output_dir, params):
+    # Get the path for the last generation
+    gen_path = get_log_path(path, params['max_gen'] - 1)  # Ultima generazione
+
+    try:
+        # Read the log file for the last generation
+        l = pd.read_csv(gen_path, delimiter="\t", decimal=",")
+        l["type"] = params['max_gen'] - 1  # Assign the generation number
+
+        # True labels
+        y_true = l.convieneSvolta.astype(int)  # Assuming 'convieneSvolta' is the true label
+        # Predicted labels
+        y_pred = l.predAction.astype(int)  # Assuming 'predAction' is the predicted label
+
+        # Compute confusion matrix
+        cm = confusion_matrix(y_true, y_pred)
+
+        # Plot confusion matrix
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'])
+        plt.title(f"Confusion Matrix - Generation {params['max_gen']}")
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f"confusion_matrix_last_gen_{params['max_gen']}.png"))
+        plt.close()
+
+    except Exception as e:
+        print(f"Errore durante la generazione della matrice di confusione per l'ultima generazione: {e}")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-g", "--generations", type=int, default=50, help="Number of generations to read")  # Modifica qui
     args = parser.parse_args()
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(script_dir, "outputTest")
     output_dir = setup_output_directory(script_dir)
 
-    params = read_parameters(data_path, args.generations)
+    params = read_parameters(data_path, args.generations)  # Passiamo il parametro delle generazioni
+
     plot_max_fitness(data_path, output_dir, params)
     plot_mean_fitness(data_path, output_dir, params)
     plot_accuracy(data_path, output_dir, params)
-
-    print("Tutti i grafici sono stati generati con successo!")
+    plot_confusion_matrix_last_generation(data_path, output_dir, params)
+    plot_classification_metrics(data_path, output_dir, params)
 
 if __name__ == "__main__":
     main()

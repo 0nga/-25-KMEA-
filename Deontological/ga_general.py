@@ -27,6 +27,7 @@ def main():
 	# Gestione dei flag passati nel comando
 	opts, args = getopt.getopt(sys.argv[1:],"ha:o:g:p:e:r")
 	print(f"Arguments count: {len(sys.argv)}")
+	
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
 			print("'test.py -g <numGenerations> -p <numIndividuals> -e <percElite> -r <percRandom>'")

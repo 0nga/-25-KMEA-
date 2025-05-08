@@ -14,7 +14,7 @@ i = 2
 # Parametri
 i = 4
 prob = 0.1
-num_gen = 10
+num_gen = 1000
 
 # Primo comando
 command_1 = [
