@@ -5,37 +5,45 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 end_value = 6
 prob_value = (1.0, 0.8, 0.5, 0.1)
 
 prob = 0.1
 i = 2
 
-#for i in range(1,end_value):
-import subprocess
-
 # Parametri
 i = 4
 prob = 0.1
+num_gen = 10
 
-# Comando corretto
-command = [
+# Primo comando
+command_1 = [
     "python3",
     "Utilitarian/ga_utilitarian.py",
-    "-g", "50",
+    "-g", str(num_gen),
     "-p", "100",
-    #"-a", f"0.{i}",
     "-r",
     "-e", str(prob),
     "-o", "Utilitarian/outputTest"
 ]
 
-# Esecuzione
-print("Eseguo:", " ".join(command))
-result = subprocess.run(command)
+# Esecuzione del primo comando
+print("Eseguo primo comando:", " ".join(command_1))
+result_1 = subprocess.run(command_1)
 
-# Controllo esito
-print("Comando eseguito correttamente:", result.returncode == 0)
+# Controllo esito del primo comando
+print("Comando 1 eseguito correttamente:", result_1.returncode == 0)
 
+# Secondo comando
+command_2 = [
+    "python3",
+    "Utilitarian/plotAll.py",  
+    "-g", str(num_gen) 
+]
 
+# Esecuzione del secondo comando
+print("Eseguo secondo comando:", " ".join(command_2))
+result_2 = subprocess.run(command_2)
+
+# Controllo esito del secondo comando
+print("Comando 2 eseguito correttamente:", result_2.returncode == 0)

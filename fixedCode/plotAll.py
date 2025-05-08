@@ -17,7 +17,7 @@ def read_parameters(path, max_gen=None):
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 50,
+        'max_gen': 50,  # Default value for max_gen
         'pop_size': 100
     }
 
@@ -41,7 +41,7 @@ def read_parameters(path, max_gen=None):
                 continue
 
     if max_gen is not None:
-        params['max_gen'] = max_gen
+        params['max_gen'] = max_gen  # Override with the value passed via command line
 
     return params
 
@@ -199,14 +199,14 @@ def plot_accuracy(path, output_dir, params):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generations", type=int, default=None, help="Number of generations to read")
+    parser.add_argument("-g", "--generations", type=int, default=50, help="Number of generations to read")  # Modifica qui
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(script_dir, "outputTest")
     output_dir = setup_output_directory(script_dir)
 
-    params = read_parameters(data_path, args.generations)
+    params = read_parameters(data_path, args.generations)  # Passiamo il parametro delle generazioni
 
     plot_max_fitness(data_path, output_dir, params)
     plot_mean_fitness(data_path, output_dir, params)
