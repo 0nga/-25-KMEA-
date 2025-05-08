@@ -23,7 +23,7 @@ prob = 0.1
 command = [
     "python3",
     "Deontological/ga_general.py",
-    "-g", "20",
+    "-g", "50",
     "-p", "100",
     #"-a", f"0.{i}",
     "-r",

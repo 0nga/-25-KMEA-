@@ -122,7 +122,10 @@ def main():
 			u_svolta = scenario[0] * scenario[4] * scenario[1] - scenario[2] * (1 - scenario[4]) + scenario[0] * computeCost * conf.costPedestrian * scenario[1]
 			u_dritto = scenario[2] * (1-scenario[4]) * scenario[3] - scenario[0]*scenario[4] - scenario[0] * computeCost * conf.costPedestrian
 
-			convieneSvolta = (u_svolta > u_dritto)
+			#convieneSvolta = (u_svolta > u_dritto)
+			#convieneSvolta = True #salvo i pedoni
+			convieneSvolta = False #salvo i passeggeri
+
 			#print("Conviene svoltare:",convieneSvolta)
 			scenario=np.append(scenario,convieneSvolta)
 			scenario=np.append(scenario,predAction_list[ind])

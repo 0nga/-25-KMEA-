@@ -20,8 +20,7 @@ random.seed(42)
 class Individual:
 
 	"""
-	Define an Individual
-	Metodo costruttore
+	Define an Individual: Metodo costruttore
 	"""
 	def __init__(self,conf):
 		self.nn = make_nn_individual()
@@ -37,23 +36,26 @@ class Individual:
 			self.altruism = conf.ALTRUISM
 
 		self.knob = random.random()
-		#print("Knob initialization",self.knob)
 
 	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
 		self.scenario = copy.deepcopy(scenario)
 		# Standardization of the input for NN
-		scenario_copia=copy.deepcopy(scenario)
-		self.knob = self.nn.predict(scenario_copia)[0][0]
+		scenario_input=copy.deepcopy(scenario)
+
+		# Predizione del valore di knob tramite la rete neurale
+		self.knob = self.nn.predict(scenario_input)[0][0]
 		if self.knob > 1: self.knob = 1
 		if self.knob < 0: self.knob = 0
 
-		scenario = scaler.inverse_transform(scenario)
+		# Inverse transform per usare valori reali
+		scenario_real = scaler.inverse_transform(scenario)
+		nPed, probPed, nPass, probPass, altruism = scenario_real[0]
 		
-		#Evaluate scenario
-		evaluatePedestrian = scenario[0][0] * scenario[0][1]
-		evaluatePassengers = scenario[0][2] * scenario[0][3]
+		# Evaluate scenario
+		evaluatePedestrian = nPed * probPed
+		evaluatePassengers = nPass * probPass
 		
-		#predAction=1 means turn, predAction=0 means go straight
+		# predAction=1 means turn, predAction=0 means go straight
 		self.predAction = 0
 		if (self.knob * evaluatePassengers < evaluatePedestrian * (1-self.knob)):
 			self.predAction = 1
@@ -68,21 +70,21 @@ class Individual:
 		utility = 0
 		
 		# Rule 1: Penalize if choosing to harm pedestrians when they have right of way
-		if self.predAction == 0 and scenario[0][0] > 0:  # Going straight when pedestrians present
+		if self.predAction == 0 and nPed > 0:  # Going straight when pedestrians present
 			utility -= 1.0  # Strong penalty for violating pedestrian right of way
 			
 		# Rule 2: Penalize if choosing to harm passengers
-		if self.predAction == 1 and scenario[0][2] > 0:  # Turning when passengers present
+		if self.predAction == 1 and nPass > 0:  # Turning when passengers present
 			utility -= 0.8  # Penalty for harming passengers
 			
 		# Rule 3: Reward for following traffic rules
-		if self.predAction == 0 and scenario[0][0] == 0:  # Going straight when no pedestrians
+		if self.predAction == 0 and nPed == 0:  # Going straight when no pedestrians
 			utility += 0.5  # Reward for following rules
-		elif self.predAction == 1 and scenario[0][2] == 0:  # Turning when no passengers
+		elif self.predAction == 1 and nPass == 0:  # Turning when no passengers
 			utility += 0.5  # Reward for following rules
 			
 		# Rule 4: Reward for minimizing risk
-		if scenario[0][1] < 0.5 and scenario[0][3] < 0.5:  # Low probability of harm
+		if probPed < 0.5 and probPass < 0.5:  # Low probability of harm
 			utility += 0.3  # Reward for safe driving
 			
 		# Normalize fitness to 0-1 range
@@ -97,11 +99,12 @@ class Individual:
 		Compute the action performed by an average individual
 		'''
 		avgAction=0
-		#Evaluate scenario
+
+		# Evaluate scenario
 		evaluatePedestrian = self.scenario[0][0] * self.scenario[0][1]
 		evaluatePassengers = self.scenario[0][2] * self.scenario[0][3]
-		#print(f"avgKnobLevel: {avgKnobLevel}")
-		if(avgKnobLevel * evaluatePassengers < evaluatePedestrian * (1-avgKnobLevel)):
+
+		if(avgKnobLevel * evaluatePassengers < evaluatePedestrian * (1 - avgKnobLevel)):
 			avgAction = 1
 			
 		reward=0
@@ -186,7 +189,6 @@ def mutate_chromosome(conf,individual=None):
 					weights[0][i][j] += delta
 		l.set_weights(weights)
 	return individual
-
 
 # Suggerimento: Se vuoi un comportamento più realistico biologicamente, potresti usare un crossover uniforme 
 # con probabilità, o una media pesata (es. interpolazione tra geni). Fammi sapere se vuoi un esempio di quello.

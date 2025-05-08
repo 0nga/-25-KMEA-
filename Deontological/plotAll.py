@@ -19,7 +19,7 @@ def read_parameters(path, max_gen=None):
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 20,
+        'max_gen': 50,
         'pop_size': 100
     }
 

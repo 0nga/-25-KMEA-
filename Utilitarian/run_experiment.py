@@ -22,8 +22,8 @@ prob = 0.1
 # Comando corretto
 command = [
     "python3",
-    "Utilitarian/ga_general.py",
-    "-g", "20",
+    "Utilitarian/ga_utilitarian.py",
+    "-g", "50",
     "-p", "100",
     #"-a", f"0.{i}",
     "-r",

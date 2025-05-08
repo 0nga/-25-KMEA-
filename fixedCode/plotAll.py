@@ -6,24 +6,21 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score
 import argparse
 
-def setup_output_directory(approach):
-    """Create and return the output directory for plots"""
-    # Change output directory to be inside the approach folder
-    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), approach, "grafici")
+def setup_output_directory(script_dir):
+    output_dir = os.path.join(script_dir, "grafici")
     os.makedirs(output_dir, exist_ok=True)
     return output_dir
 
 def read_parameters(path, max_gen=None):
-    """Read parameters from out.txt file"""
     params = {
         'altruismLevel': -1,
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 20,  # default value
+        'max_gen': 50,
         'pop_size': 100
     }
-    
+
     with open(os.path.join(path, 'out.txt'), 'r') as f:
         for line in f:
             try:
@@ -39,33 +36,33 @@ def read_parameters(path, max_gen=None):
                 elif key == "POPULATION_SIZE":
                     params['pop_size'] = eval(val)
                 elif key == "probDeathPassengers":
-                    params['probPass'] = eval(val)
+                    params['probPass'] = val
             except Exception:
                 continue
-    
-    # Override max_gen if provided via command line
+
     if max_gen is not None:
         params['max_gen'] = max_gen
-        
+
     return params
 
+def get_log_path(base_path, generation):
+    s = f"{generation:03d}"
+    migliaia = generation // 1000
+    return os.path.join(base_path, "logs", str(migliaia), f"gen_{s}.txt")
+
 def plot_max_fitness(path, output_dir, params):
-    """Plot maximum fitness over generations"""
     sns.set(style="darkgrid")
     maxFitness = pd.DataFrame(columns=['index', 'maxFit'])
     avgFitness = pd.DataFrame([])
-    
+
     for i in range(params['max_gen']):
-        s = "%03d" % i
-        migliaia = int(i / 1000)
-        filepath = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
+        filepath = get_log_path(path, i)
         l = pd.read_csv(filepath, delimiter="\t", decimal=",")
         l["type"] = i
-        
+
         maxFitness = pd.concat([maxFitness, pd.DataFrame([[i, np.max(l.Fitness)]], columns=['index', 'maxFit'])], ignore_index=True)
         avgFitness = pd.concat([avgFitness, l], ignore_index=True)
-    
-    # Plot max fitness
+
     plt.figure(figsize=(8, 8))
     sns.lineplot(x="index", y="maxFit", data=maxFitness)
     plt.title("Andamento della Massima Fitness")
@@ -74,8 +71,7 @@ def plot_max_fitness(path, output_dir, params):
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "maxFit.png"))
     plt.close()
-    
-    # Plot average fitness
+
     plt.figure(figsize=(8, 8))
     sns.lineplot(x="type", y="Fitness", data=avgFitness)
     plt.title("Fitness Media per Generazione")
@@ -86,18 +82,15 @@ def plot_max_fitness(path, output_dir, params):
     plt.close()
 
 def plot_mean_fitness(path, output_dir, params):
-    """Plot mean fitness and altruism level"""
     sns.set(style="darkgrid")
     avgFitness = pd.DataFrame([])
-    
+
     for i in range(params['max_gen']):
-        s = "%03d" % i
-        migliaia = int(i / 1000)
-        log_path = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
+        log_path = get_log_path(path, i)
         l = pd.read_csv(log_path, delimiter="\t", decimal=",")
         l["type"] = i
         avgFitness = pd.concat([avgFitness, l], ignore_index=True)
-    
+
     plt.figure(figsize=(8, 8))
     title = f"Probability of Death for Pedestrian: {params['probPed']}"
     altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
@@ -106,49 +99,43 @@ def plot_mean_fitness(path, output_dir, params):
     ax.set(xlabel='Generation', ylabel='AltruismLevel')
     plt.ylim(0, 1.0)
     plt.title(title)
-    
+
     filename = f"altruism_probPed_{params['probPed']}_costPed_{params['costPed']}.png"
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, filename))
     plt.close()
 
 def plot_accuracy(path, output_dir, params):
-    """Plot accuracy and related metrics"""
     accuracy_data = []
     tp_list, tn_list, fp_list, fn_list = [], [], [], []
-    
+
     for i in range(params['max_gen']):
-        s = f"{i:03d}"
-        migliaia = i // 1000
-        gen_path = os.path.join(path, "logs", str(migliaia), f"gen_{s}.txt")
-        
+        gen_path = get_log_path(path, i)
+
         try:
             l = pd.read_csv(gen_path, delimiter="\t", decimal=",")
             l["type"] = i
-            
-            # Calculate accuracy
+
             accuracy = (l.convieneSvolta == l.predAction)
             accuracy_data.append({'generation': i, 'accuracy': sum(accuracy)})
-            
-            # Calculate TP/TN/FP/FN
+
             tp = sum((l.convieneSvolta == True) & (l.predAction == True))
             tn = sum((l.convieneSvolta == False) & (l.predAction == False))
             fp = sum((l.convieneSvolta == False) & (l.predAction == True))
             fn = sum((l.convieneSvolta == True) & (l.predAction == False))
-            
+
             tp_list.append(tp)
             tn_list.append(tn)
             fp_list.append(fp)
             fn_list.append(fn)
-            
-            # Plot ROC curve for each generation
+
             y_true = l.convieneSvolta.astype(int)
             y_score = l.predAction.astype(float)
-            
+
             if len(np.unique(y_true)) > 1:
                 fpr, tpr, _ = roc_curve(y_true, y_score)
                 auc_score = roc_auc_score(y_true, y_score)
-                
+
                 plt.figure(figsize=(6, 6))
                 plt.plot(fpr, tpr, marker='.', label=f'Gen {i} (AUC = {auc_score:.2f})')
                 plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='No Skill')
@@ -159,16 +146,15 @@ def plot_accuracy(path, output_dir, params):
                 plt.grid(True)
                 plt.savefig(os.path.join(output_dir, f"roc_gen_{i}.png"))
                 plt.close()
-                
+
         except Exception as e:
             print(f"Errore alla generazione {i}: {e}")
-    
-    # Plot final ROC curve
+
     if len(np.unique(y_true)) > 1:
         ns_probs = np.random.randint(2, size=len(y_true))
         ns_fpr, ns_tpr, _ = roc_curve(y_true, ns_probs)
         lr_fpr, lr_tpr, _ = roc_curve(y_true, y_score)
-        
+
         plt.figure(figsize=(6, 6))
         plt.plot(ns_fpr, ns_tpr, linestyle='--', label='No Skill')
         plt.plot(lr_fpr, lr_tpr, marker='.', label='NN')
@@ -178,16 +164,14 @@ def plot_accuracy(path, output_dir, params):
         plt.title(f"ROC Curve - Ultima Generazione (AUC = {roc_auc_score(y_true, y_score):.2f})")
         plt.savefig(os.path.join(output_dir, f"roc_curve_altruism_{params['altruismLevel']}.png"))
         plt.close()
-    
-    # Plot accuracy curves
+
     accuracyList = pd.DataFrame(accuracy_data)
     accuracyList.generation = accuracyList.generation.astype('float64')
     accuracyList.accuracy = accuracyList.accuracy.astype('float64')
-    
+
     altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
     title = f"Death Pedestrian: {params['probPed']} selfish: {1 - altruism_value}"
-    
-    # Plot accuracy regression
+
     plt.figure(figsize=(8, 8))
     ax = sns.regplot(
         x="generation",
@@ -201,8 +185,7 @@ def plot_accuracy(path, output_dir, params):
     plt.title(title)
     plt.savefig(os.path.join(output_dir, f"accuracy_curve_altruism_{params['altruismLevel']}.png"))
     plt.close()
-    
-    # Plot accuracy metrics
+
     plt.figure(figsize=(8, 8))
     plt.plot(accuracyList.generation, np.array(accuracyList.accuracy) / params['pop_size'], label="Accuracy")
     plt.plot(accuracyList.generation, np.array(tp_list) / params['pop_size'], label="True Positive")
@@ -215,28 +198,19 @@ def plot_accuracy(path, output_dir, params):
     plt.close()
 
 def main():
-    # Setup argument parser
-    parser = argparse.ArgumentParser(description='Generate plots for the genetic algorithm results')
-    parser.add_argument('-g', '--generations', type=int, help='Number of generations to process (overrides the value in out.txt)')
-    parser.add_argument('-a', '--approach', choices=['Deontological', 'Utilitarian'], default='Deontological',
-                      help='Approach type: Deontological or Utilitarian')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--generations", type=int, default=None, help="Number of generations to read")
     args = parser.parse_args()
-    
-    # Setup paths and directories
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base_path, args.approach, "test", "outputTest")
-    output_dir = setup_output_directory(args.approach)
-    
-    # Read parameters
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(script_dir, "outputTest")
+    output_dir = setup_output_directory(script_dir)
+
     params = read_parameters(data_path, args.generations)
-    
-    # Generate all plots
+
     plot_max_fitness(data_path, output_dir, params)
     plot_mean_fitness(data_path, output_dir, params)
-    if args.approach == 'Deontological':
-        plot_accuracy(data_path, output_dir, params)
-    
-    print("All plots have been generated successfully!")
+    plot_accuracy(data_path, output_dir, params)
 
 if __name__ == "__main__":
-    main() 
+    main()
