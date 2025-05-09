@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-05-06 16:24:15.714633 by randomTrips.py UNKNOWN
+<!-- generated on 2025-05-08 12:15:48.868241 by randomTrips.py UNKNOWN
 <configuration>
     <net-file value="test.net.xml"/>
     <output-trip-file value="pedestrians2.rou.xml"/>

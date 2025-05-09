@@ -132,11 +132,9 @@ class Individual:
 		print(f"FITNESS: {utility} \t predAction: {self.predAction} \n")'''
 
 		utility_max_value = max(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
 		utility_min_value = min(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
 		
 		range_utility=(utility_max_value-utility_min_value)
-		
 		
 		#self.fitness = (utility-utility_min_value)/range_utility + reward
 		#self.fitness = utility 

@@ -36,7 +36,7 @@ class Configuration:
 		self.randomizeAltruism = False
 		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_probPed_"+str(self.probDeathPedestrians)+"_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
 		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_general_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
-		self.set_path("/Users/aloreggia/Downloads/test/500ge/default")
+		self.set_path("/Users/onga/git/-25-KMEA-/Utilitarian/outputTest")
 		self.set_best_candidates()
 		self.set_random_candidates()
 		
