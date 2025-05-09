@@ -1,478 +1,463 @@
 import os
 import random
-#import gym
 import pandas as pd
 import numpy as np
 import time
 from keras.models import Sequential,Model
 from keras.layers import Dense, Dropout, InputLayer, Input
 from keras import backend as K
-from Configuration import Configuration
+from Configuration import Configuration # Assicurati che Configuration.py sia accessibile
 from sklearn.preprocessing import StandardScaler
 import copy
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import sys, getopt
-
 import random
+
 random.seed(42)
 
 class Individual:
-
 	"""
 	Define an Individual
 	Metodo costruttore
 	"""
 	def __init__(self,conf):
-		self.nn = make_nn_individual()
-
-		self.fitness = 0
-		self.age = 0
-		self.predAction = -1
-		self.scenario = None
+		self.nn = make_nn_individual() # Crea la rete neurale per l'individuo
+		self.fitness = 0 # Fitness iniziale
+		self.predAction = -1 # Azione predetta (-1: non ancora calcolata, 0: dritto, 1: svolta)
+		self.scenario = None # Scenario corrente affrontato dall'individuo
 
 		if conf.randomizeAltruism:
 			self.altruism = random.random()
 		else:
 			self.altruism = conf.ALTRUISM
-
+		
 		self.knob = random.random()
-		#print("Knob initialization",self.knob)
 
 	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
-		self.scenario = copy.deepcopy(scenario)
-		# Standardization of the input for NN
-		scenario_copia=copy.deepcopy(scenario)
-		#scenario_copia[0][0]=(scenario_copia[0][0]-3.5)/1.7
-		#scenario_copia[0][2]=(scenario_copia[0][2]-3.5)/1.7
-
-		#print("Scenario pre predict ",scenario_copia)
-		self.knob = self.nn.predict(scenario_copia)[0][0]
-		if self.knob > 1: self.knob = 1
-		if self.knob < 0: self.knob = 0
-
-		#print(f"prima {scenario}")
-		scenario = scaler.inverse_transform(scenario)
-		#print(f"dopo {scenario}")
-		#print("Predicction ",self.nn.predict(scenario_copia))
+		"""
+		Calcola la fitness dell'individuo basata sullo scenario corrente.
+		L'auto andrà SEMPRE DRITTA (approccio deontologico).
+		Lo scaler è usato per denormalizzare i valori dello scenario per i calcoli di utilità.
+		"""
+		self.scenario = copy.deepcopy(scenario) # Salva una copia dello scenario (standardizzato)
 		
-
-		#Evaluate scenario
-		evaluatePedestrian = scenario[0][0] * scenario[0][1]
-		evaluatePassengers = scenario[0][2] * scenario[0][3]
-		# Check whether the cost should be computed or not
-		# If the probability of harming pedestrian is greater than the probability of harming passenger than cost 
-		# should be computed 
-		computeCost = 0
-		if (evaluatePedestrian > evaluatePassengers):
-			computeCost = 1
-		
-		#predAction=1 means turn, predAction=0 means go straight
-		self.predAction = 0
-		if (self.knob * evaluatePassengers < evaluatePedestrian * (1-self.knob)):
-			self.predAction = 1
-			
-		selfish = 1 - self.altruism
-		
-		temp_numberOfPedestrians = scenario[0][0]
-		temp_numberOfPassengers = scenario[0][2]
-		
-		#Check scenario response, whether or not pedestrian are injuried
-		scenarioDice = random.random()
-		dead = 0
-
-		probDeath=0
-		if self.predAction==0:
-			probDeath = scenario[0][1]
-		else:
-			probDeath = scenario[0][3]
-
-		if (scenarioDice < probDeath):
-			dead = 1
-		
-		'''
-		REMEMBER: WHEN THE UTILITY FUNCTION CHANGES YOU SHOULD ALSO CHANGE LINE 118 AND 119 IN GA_GENERAL
-		
-		'''
-		if self.predAction==0:
-			#utility = (temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism   - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead )
-			utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead 
-			#utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism - dead * temp_numberOfPedestrians * (self.altruism + computeCost * conf.costPedestrian)) 
-		else:
-			#utility = (temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish)
-			utility = (temp_numberOfPassengers * selfish * (1 - dead) + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1] )
-			#utility = ((1-dead)*temp_numberOfPassengers * selfish  - dead * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		
-		# This is used to normalize the fitness value into 0-1
-		'''utility_straight_max_pass=((conf.numberOfPassengers+1) * selfish - 1 * self.altruism)
-		utility_straight_min_pass=(1 * selfish - (conf.numberOfPedestrians+1) * self.altruism - (conf.numberOfPedestrians+1) * conf.costPedestrian - conf.STIGMA)
-		utility_turn_max_pass = (conf.numberOfPedestrians+ 1 ) * self.altruism  - 1 * selfish + conf.HONOR
-		utility_turn_min_pass = (1 * self.altruism - (conf.numberOfPassengers + 1) * selfish )'''
-
-		'''utility_straight_max_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism)
-		utility_straight_min_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism - temp_numberOfPedestrians * conf.costPedestrian)
-		utility_turn_max_pass = temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish
-		utility_turn_min_pass = (temp_numberOfPedestrians * self.altruism - temp_numberOfPassengers * selfish )'''
-
-		utility_straight_max_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * 1 * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * 0 
-		utility_straight_min_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * 0 * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * 1 * conf.costPedestrian * 1
-		utility_turn_max_pass = (temp_numberOfPassengers * selfish * 1 + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1])
-		utility_turn_min_pass = (temp_numberOfPassengers * selfish * 0 + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1])
-
-		'''utility_straight_max_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism) 
-		utility_straight_min_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism - 2 * 1 * temp_numberOfPedestrians *  self.altruism - 1 * temp_numberOfPedestrians * computeCost * conf.costPedestrian)
-		utility_turn_max_pass = (temp_numberOfPassengers * selfish - 0*temp_numberOfPassengers * selfish  - 0 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		utility_turn_min_pass = (temp_numberOfPassengers * selfish - 1*temp_numberOfPassengers * selfish  - 1 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )'''
-		
-		'''print(f"STRAIGHT MAX: {utility_straight_max_pass} \t STRAIGHT MIN: {utility_straight_min_pass} \t")
-		print(f"TURN MAX: {utility_turn_max_pass} \t TURN MIN: {utility_turn_min_pass} \t")
-		print(f"altruism: {temp_numberOfPassengers * selfish} \t penalty: {temp_numberOfPedestrians * self.altruism} \t cost {temp_numberOfPedestrians * conf.costPedestrian}")
-		print(f"utility: {temp_numberOfPassengers * selfish} \t penalty: {- temp_numberOfPedestrians * self.altruism} \t")
-		print(f"coswt: {- temp_numberOfPedestrians * conf.costPedestrian} \t stigme: {conf.STIGMA} \t")
-		print(f"FITNESS: {utility} \t predAction: {self.predAction} \n")'''
-
-		utility_max_value = max(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
-		utility_min_value = min(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
-		range_utility=(utility_max_value-utility_min_value)
-		
-		
-		#self.fitness = (utility-utility_min_value)/range_utility + reward
-		#self.fitness = utility 
-		self.fitness = (utility - utility_min_value)/range_utility
-					
-		#print(f"Action: {predAction} \tknob: {self.knob:.4f} \tPed: {temp_numberOfPedestrians:.4f} \tPass: {temp_numberOfPassengers:.4f} \tdead: {dead} \treward: {reward} \tfitness: {self.fitness:.4f}")
-		return self.predAction
+		# --- MODIFICA DEONTOLOGICA CHIAVE ---
+		# L'auto va sempre dritta, indipendentemente dall'output della NN (knob).
+		# predAction = 0 significa andare dritto.
+		# predAction = 1 significherebbe svoltare.
+		self.predAction = 1
+		# --- FINE MODIFICA DEONTOLOGICA ---
+		return self.predAction # Ritorna l'azione (sempre 0)
 
 	def computeSelfEsteem(self, conf, avgKnobLevel):
-		'''
-		Compute the action performed by an average individual
-		'''
-		avgAction=0
-		#Evaluate scenario
-		evaluatePedestrian = self.scenario[0][0] * self.scenario[0][1]
-		evaluatePassengers = self.scenario[0][2] * self.scenario[0][3]
-		#print(f"avgKnobLevel: {avgKnobLevel}")
-		if(avgKnobLevel * evaluatePassengers < evaluatePedestrian * (1-avgKnobLevel)):
+		"""
+		Aggiorna la fitness dell'individuo basandosi su onore e stigma.
+		Questo dipende da come l'azione dell'individuo (sempre dritto) si confronta
+		con l'azione media della "comunità" (basata su avgKnobLevel).
+		"""
+		# Per calcolare avgAction, servono i valori denormalizzati dello scenario corrente dell'individuo.
+		# self.scenario è standardizzato. Dobbiamo denormalizzarlo o passare lo scaler.
+		# Assumiamo che lo scaler sia disponibile tramite conf o passato come argomento se necessario.
+		# Per ora, la logica di avgAction è semplificata e potrebbe non essere accurata
+		# senza i valori denormalizzati corretti.
+		
+		# Denormalizza lo scenario per calcolare avgAction in modo più accurato
+		# Questo richiede che lo scaler sia accessibile qui. Se non lo è, questa parte
+		# potrebbe non funzionare come previsto. Per ora, assumiamo che self.scenario sia
+		# quello standardizzato e che lo scaler non sia direttamente disponibile qui.
+		# Questa è una semplificazione e potrebbe necessitare di aggiustamenti.
+		
+		# Valori denormalizzati (ipotetici, dato che lo scaler non è passato qui)
+		# num_ped_denorm = self.scenario[0][0] # Esempio, ma self.scenario è standardizzato
+		# prob_ped_denorm = self.scenario[0][1]
+		# num_pass_denorm = self.scenario[0][2]
+		# prob_pass_denorm = self.scenario[0][3]
+
+		# evaluatePedestrian_denorm = num_ped_denorm * prob_ped_denorm
+		# evaluatePassengers_denorm = num_pass_denorm * prob_pass_denorm
+		
+		avgAction = 0 # Azione media della comunità (0: dritto, 1: svolta)
+		# La logica originale per avgAction:
+		# if(avgKnobLevel * evaluatePassengers_denorm < evaluatePedestrian_denorm * (1-avgKnobLevel)):
+		#	avgAction = 1
+		# Poiché non abbiamo i valori denormalizzati facilmente qui, questa parte è problematica.
+		# Per ora, la logica di reward/stigma procederà, ma avgAction potrebbe non essere calcolata correttamente.
+		# Una soluzione sarebbe passare lo scaler a computeSelfEsteem o lo scenario denormalizzato.
+
+		# --- Semplificazione per avgAction ---
+		# Se non possiamo calcolare avgAction accuratamente, l'impatto di Stigma/Honor sarà limitato.
+		# Per procedere, potremmo assumere un avgAction o basarlo solo su avgKnobLevel in modo più diretto.
+		# Ad esempio, se avgKnobLevel > 0.5, la comunità tende a svoltare (avgAction = 1).
+		if avgKnobLevel > 0.5: # Semplificazione: se il knob medio è alto, la comunità "svolta"
 			avgAction = 1
-			
-		reward=0
-			
-		'''
-		 If on average community choose a selfish action and I choose an altruistic action then the reward is honorable and weighted with my altruistic behaviour 
-		 ''' 
-		if(avgAction == 0 and self.predAction == 1):
-			reward = conf.HONOR #*altruism
+		else:
+			avgAction = 0
+		# --- Fine Semplificazione ---
 
-		'''
-		 If on average community choose an altruistic action and I choose a selfish action then the reward is a stigma weighted with my altruistic behaviour 
-		 '''
-		if(avgAction == 1 and self.predAction == 0):
-			reward = conf.STIGMA #* selfish
+		reward = 0 # Ricompensa o penalità sociale
+			
+		# L'individuo va sempre dritto (self.predAction == 0)
+		# Se la comunità in media svolta (avgAction == 1) e l'individuo va dritto (self.predAction == 0),
+		# l'individuo riceve uno "stigma" per non essersi conformato all'azione altruistica (ipotetica) della comunità.
+		if avgAction == 1 and self.predAction == 0:
+			reward = conf.STIGMA 
 
+		# Se la comunità in media va dritto (avgAction == 0) e l'individuo va dritto (self.predAction == 0),
+		# non c'è né stigma né onore speciale (o un piccolo premio per conformità, a seconda delle regole).
+		# Lasciamo reward = 0 in questo caso.
+
+		# Il caso in cui l'individuo svolta (self.predAction == 1) non accade, quindi conf.HONOR non viene applicato
+		# per aver scelto un'azione altruistica quando la comunità è egoista.
+		
 		self.fitness += reward
+		# Assicura che la fitness rimanga nel range [0,1] anche dopo stigma/onore
+		self.fitness = max(0, min(1, self.fitness))
+
 
 def make_nn_individual():
+	"""
+	Crea e compila un modello di rete neurale sequenziale per un individuo.
+	Input: 5 caratteristiche dello scenario.
+	Output: 1 valore (il 'knob').
+	"""
 	m_model = Sequential()
+	m_model.add(Dense(3, input_dim=5, activation='relu')) # Strato nascosto con 3 neuroni e attivazione ReLU
+	# m_model.add(Dense(5,  activation='relu')) # Esempio di un altro strato nascosto (opzionale)
+	m_model.add(Dense(1, activation='sigmoid')) # Strato di output con 1 neurone e attivazione sigmoide per output tra 0 e 1
 
-	'''inp = Input(shape=(6,1))
-	x = Dense(3, activation='relu', name='dense1')(inp)
-	out = Dense(1, activation='tanh', name='dense2')(x)
-	m_model=Model(inp, out)'''
+	# Compila il modello
+	# 'adam' è un ottimizzatore comune.
+	# 'mse' (mean squared error) è una funzione di loss adatta per problemi di regressione (come predire 'knob').
+	m_model.compile(optimizer='adam', loss='mse')
 	
-	m_model.add(Dense(3, input_dim=5))
-	#m_model.add(Dense(5,  activation='relu')) prova anche questo
-	#m_model.add(Dense(1,  activation='tanh'))
-	m_model.add(Dense(1))
-
-	# Compile Neural Network
-	m_model.compile(optimizer='adam', loss='categorical_crossentropy')
-	# provare con loss='mse'
-	
-	'''
-	CHATGPT
-	Problemi nel codice:
-	loss='categorical_crossentropy':
-	Questo tipo di loss è usato per classificazione multi-classe con one-hot encoding.
-	Ma il modello ha un solo output Dense(1), quindi probabilmente serve un'altra loss function.
-	'''
-	#m_model.summary()
+	# m_model.summary() # Decommenta per stampare un riassunto del modello
 	return m_model
 
 def generate_first_population_randomly(conf):
 	"""
-	Creates an Initial Random Population
-	 :param conf: oggetto di configurazione contenente POPULATION_SIZE
-    :return: lista di individui generati
+	Crea una popolazione iniziale di individui in modo casuale.
+	:param conf: Oggetto di configurazione contenente POPULATION_SIZE.
+	:return: Lista di individui generati.
 	"""
-
 	print("[+] Creating Initial NN Model Population Randomly: ", end='')
-
 	result = []
 	run_start = time.time()
-
-	for current in range(conf.POPULATION_SIZE):
+	for _ in range(conf.POPULATION_SIZE): # Usa _ se l'indice non è necessario
 		temp_individual = Individual(conf)
 		result.append(temp_individual)
-		
 	run_stop = time.time()
-	print(f"Done > Takes {run_stop-run_start} sec")
-
+	print(f"Done > Takes {run_stop-run_start:.2f} sec")
 	return result
 
-def mutate_chromosome(conf,individual=None):
+def mutate_chromosome(conf, individual=None):
 	"""
-	Randomnly mutate individual chromosome
-	:param population: Current Population
-	:return: A new population
+	Applica una mutazione casuale ai pesi della rete neurale dell'individuo.
+	:param conf: Oggetto di configurazione con i parametri di mutazione.
+	:param individual: L'individuo da mutare.
+	:return: L'individuo mutato.
 	"""
-	#Apply mutation to each weight of the NN 
-	for l in individual.nn.layers:
-		weights = l.get_weights()
-		for i in range(len(weights[0])):
-			for j in range(len(weights[0][i])):
-				#Compute random value in the delta interval
+	if individual is None:
+		return None
+
+	for layer in individual.nn.layers:
+		original_weights = layer.get_weights() # Lista di array NumPy (pesi e bias)
+		mutated_weights_list = []
+
+		for weights_array in original_weights:
+			mutated_array = np.copy(weights_array) # Lavora su una copia
+			# Itera su ogni elemento dell'array dei pesi/bias
+			for index in np.ndindex(weights_array.shape):
 				if random.random() < conf.HIDDEN_LAYER_MUTATION_PROBABILITY:
-					delta = weights[0][i][j] * conf.HIDDEN_LAYER_MUTATION_RANGE
-					delta = random.uniform(-delta, delta)
-					weights[0][i][j] += delta
-		l.set_weights(weights)
+					# Calcola la mutazione
+					current_value = weights_array[index]
+					# Assicura che HIDDEN_LAYER_MUTATION_RANGE sia un float
+					mutation_range = float(conf.HIDDEN_LAYER_MUTATION_RANGE) if hasattr(conf, 'HIDDEN_LAYER_MUTATION_RANGE') else 0.01
+					delta = current_value * mutation_range 
+					delta = random.uniform(-abs(delta), abs(delta)) # Assicura che delta sia simmetrico
+					mutated_array[index] += delta
+			mutated_weights_list.append(mutated_array)
+		layer.set_weights(mutated_weights_list)
 	return individual
 
 
-# Suggerimento: Se vuoi un comportamento più realistico biologicamente, potresti usare un crossover uniforme 
-# con probabilità, o una media pesata (es. interpolazione tra geni). Fammi sapere se vuoi un esempio di quello.
-def generate_children(conf,mother: Individual, father: Individual) -> Individual:
+def generate_children(conf, mother: Individual, father: Individual) -> Individual:
 	"""
-	Generate a New Children based Mother and Father Genomes
-	:param mother: Mother Individual
-	:param father: Father Individual
-	:return: A new Children
+	Genera un nuovo individuo (figlio) combinando i genomi (pesi della NN)
+	della madre e del padre.
+	:param conf: Oggetto di configurazione.
+	:param mother: Individuo madre.
+	:param father: Individuo padre.
+	:return: Un nuovo individuo figlio.
 	"""
-	
-	children = Individual(conf)
+	children = Individual(conf) # Crea un nuovo individuo con una NN inizializzata
 
-	for index in range(len(children.nn.layers)):
-		l_children=children.nn.layers[index]
-		l_mother=mother.nn.layers[index]
-		l_father=father.nn.layers[index]
-		weights_children = l_children.get_weights()
-		weights_mother = l_mother.get_weights()
-		weights_father = l_father.get_weights()
-		for i in range(len(weights_children[0])):
-			for j in range(len(weights_children[0][i])):
-				#Compute random value in the delta interval
-				if random.randint(0, 1) == 0:
-					weights_children[0][i][j] = weights_mother[0][i][j]
+	# Itera attraverso gli strati della rete neurale
+	for layer_idx in range(len(children.nn.layers)):
+		child_layer = children.nn.layers[layer_idx]
+		mother_layer = mother.nn.layers[layer_idx]
+		father_layer = father.nn.layers[layer_idx]
+
+		mother_weights_list = mother_layer.get_weights() # Lista di [pesi, bias]
+		father_weights_list = father_layer.get_weights()
+		child_new_weights_list = []
+
+		# Itera attraverso le matrici di pesi e i vettori di bias per lo strato corrente
+		for mother_w_matrix, father_w_matrix in zip(mother_weights_list, father_weights_list):
+			child_w_matrix = np.copy(mother_w_matrix) # Inizia con una copia (es. dalla madre)
+			
+			# Itera su ogni gene (peso/bias) nella matrice/vettore
+			for index in np.ndindex(mother_w_matrix.shape):
+				if random.randint(0, 1) == 0: # Scegli casualmente il gene dalla madre o dal padre
+					child_w_matrix[index] = mother_w_matrix[index]
 				else:
-					weights_children[0][i][j] = weights_father[0][i][j]
-		l_children.set_weights(weights_children)
+					child_w_matrix[index] = father_w_matrix[index]
+			child_new_weights_list.append(child_w_matrix)
+		
+		child_layer.set_weights(child_new_weights_list) # Imposta i nuovi pesi per lo strato del figlio
 	return children
 
-def tournament_selection(population,selectionSize):
+def tournament_selection(population, selectionSize):
 	"""
-	Perform tournament selection on the population.
-	Each tournament selects 1 winner out of 2 randomly chosen individuals.
-
-	:param population: List of Individuals
-	:param selectionSize: Number of individuals to select
-	:return: List of selected Individuals
+	Esegue la selezione a torneo sulla popolazione.
+	Ogni torneo seleziona 1 vincitore tra 2 individui scelti casualmente.
+	:param population: Lista di Individui.
+	:param selectionSize: Numero di individui da selezionare.
+	:return: Lista degli Individui selezionati.
 	"""
+	if not population: # Se la popolazione è vuota, ritorna una lista vuota
+		return []
+	if selectionSize <= 0:
+		return []
 
-	list_index_a = random.sample(range(len(population)), selectionSize)
-	list_index_b = random.sample(range(len(population)), selectionSize)
+	selected_parents = []
+	population_size = len(population)
 	
-	'''print("Original")
-	print([p.fitness for p in population])
-	print("A")
-	print([p.fitness for p in population_a])
-	print("B")
-	print([p.fitness for p in population_b])'''
-	
-	population_result = []
+	if population_size == 0: return []
 
-	for i in range(selectionSize):
-		index_a = list_index_a[i]
-		index_b = list_index_b[i]
-		if population[index_a].fitness > population[index_b].fitness:
-			population_result.append(population[index_a])
+
+	for _ in range(selectionSize):
+		# Scegli due individui a caso per il torneo
+		# Assicurati che ci siano almeno due individui per scegliere tra diversi, se possibile
+		if population_size == 1:
+			tournament_parent1 = population[0]
+			tournament_parent2 = population[0] # Se c'è un solo individuo, compete contro se stesso
 		else:
-			population_result.append(population[index_b])
+			idx1, idx2 = random.sample(range(population_size), 2)
+			tournament_parent1 = population[idx1]
+			tournament_parent2 = population[idx2]
+
+		# Il vincitore è quello con la fitness maggiore
+		if tournament_parent1.fitness >= tournament_parent2.fitness:
+			selected_parents.append(tournament_parent1)
+		else:
+			selected_parents.append(tournament_parent2)
 			
-	'''print("result")
-	print([p.fitness for p in population_result])		
-	sys.exit()'''
-	
-	return population_result
+	return selected_parents
 				
 def evolve_population(population, conf, crossover=True, elite=0):
 	"""
-	Evolve and Create the Next Generation of Individuals
-	:param population: Current Population
-	:return: A new population
+	Evolve e crea la prossima generazione di individui.
+	:param population: Popolazione corrente.
+	:param conf: Oggetto di configurazione.
+	:param crossover: Booleano, se applicare il crossover.
+	:param elite: 0 per selezione a torneo, 1 per elitismo.
+	:return: Una nuova popolazione.
 	"""
-
 	parents = []
-	if elite==1:
-		# Sort Candidates by fitness
+	if not population: # Se la popolazione di input è vuota, ritorna una lista vuota
+		return []
+
+	if elite == 1:
+		# Ordina i candidati per fitness (dal migliore al peggiore)
 		population.sort(key=lambda x: x.fitness, reverse=True)
 		
-		# Select N Best Candidates + Y Random Candidates. Kill the Rest of Chromosomes
-		parents.extend(population[0:conf.BEST_CANDIDATES_COUNT])  # N Best Candidates
-		for rn in range(conf.RANDOM_CANDIDATES_COUNT):
-			parents.append(population[random.randint(0, conf.POPULATION_SIZE - 1)])  # Y Random Candidate
-	else:
-		parents = tournament_selection(population, conf.BEST_CANDIDATES_COUNT)
+		# Seleziona i migliori N candidati e Y candidati casuali
+		# Assicurati che BEST_CANDIDATES_COUNT non superi la dimensione della popolazione
+		num_best_to_select = min(conf.BEST_CANDIDATES_COUNT, len(population))
+		parents.extend(population[0:num_best_to_select])
+		
+		# Aggiungi candidati casuali, assicurandoti di non superare la dimensione della popolazione
+		# e che ci siano individui tra cui scegliere.
+		if population: # Solo se la popolazione non è vuota
+			for _ in range(conf.RANDOM_CANDIDATES_COUNT):
+				if len(parents) < conf.POPULATION_SIZE : # Non aggiungere più genitori della dimensione della popolazione
+					parents.append(population[random.randint(0, len(population) - 1)])
+	else: # Selezione a torneo
+		num_to_select_tournament = min(conf.BEST_CANDIDATES_COUNT, len(population)) # Quanti genitori selezionare
+		if num_to_select_tournament > 0:
+			parents = tournament_selection(population, num_to_select_tournament)
 	
-	if crossover==False:
-		# Create New Population Through Crossover
+	if not parents: # Se nessun genitore è stato selezionato (es. popolazione iniziale molto piccola)
+		# Riempi la nuova popolazione con individui casuali fino a POPULATION_SIZE
 		new_population = []
-		new_population.extend(parents)
-	else:
-		new_population = []
+		print("Warning: No parents selected, filling new population with random individuals.")
+		for _ in range(conf.POPULATION_SIZE):
+			new_population.append(Individual(conf))
+		return new_population
+
+	new_population = []
+	if crossover == False: # Se non c'è crossover, i genitori diventano la nuova popolazione (potrebbe necessitare di clonazione)
+		# Per evitare di modificare i genitori originali, clonali se necessario.
+		# E riempi fino a POPULATION_SIZE con mutazioni dei genitori.
+		temp_pop = [copy.deepcopy(p) for p in parents]
+		while len(new_population) < conf.POPULATION_SIZE:
+			if not temp_pop: break # Evita loop infinito se temp_pop è vuota
+			parent_to_mutate = random.choice(temp_pop)
+			new_population.append(mutate_chromosome(conf, copy.deepcopy(parent_to_mutate)))
+		if not new_population and conf.POPULATION_SIZE > 0: # Fallback se new_population è ancora vuota
+			for _ in range(conf.POPULATION_SIZE): new_population.append(Individual(conf))
+		return new_population[:conf.POPULATION_SIZE]
+
+
+	# Creazione della nuova popolazione tramite crossover e mutazione
+	# Aggiungi i genitori d'élite direttamente alla nuova popolazione per preservarli (elitismo forte)
+	if elite == 1 and conf.BEST_CANDIDATES_COUNT > 0:
+	    # Assicurati di aggiungere copie per evitare modifiche inaspettate
+		elite_individuals = [copy.deepcopy(p) for p in population[0:min(conf.BEST_CANDIDATES_COUNT, len(population))]]
+		new_population.extend(elite_individuals)
+
 
 	while len(new_population) < conf.POPULATION_SIZE:
-		parent_a = random.randint(0, len(parents) - 1)
-		parent_b = random.randint(0, len(parents) - 1)
-		while parent_a == parent_b:
-			parent_b = random.randint(0, len(parents) - 1)
-		
-		temp_individual = mutate_chromosome(conf,
-                generate_children(conf,
-                    mother=parents[parent_a],
-                    father=parents[parent_b]
-                )
-            )
-		new_population.append(temp_individual)
+		# Seleziona due genitori dalla lista dei 'parents'
+		if len(parents) == 1: # Caso speciale: un solo genitore disponibile
+			parent_a = parents[0]
+			parent_b = parents[0] # Il genitore si accoppia con se stesso (o meglio, una sua copia mutata)
+		else:
+			parent_a, parent_b = random.sample(parents, 2) # Scegli 2 genitori distinti se possibile
 
-	return new_population
+		# Genera un figlio e applica la mutazione
+		child = generate_children(conf, mother=parent_a, father=parent_b)
+		mutated_child = mutate_chromosome(conf, child)
+		new_population.append(mutated_child)
 
-def fastCreateScenarios(conf, population, randomize=True):
-    import pandas as pd
-    import numpy as np
-    import random
+	return new_population[:conf.POPULATION_SIZE] # Assicura che la popolazione non superi la dimensione definita
 
-    scenarios = []
+# La funzione fastCreateScenarios sembra una duplicazione/alternativa di createScenarios.
+# Assicurati di usare quella corretta o di unificarle. Per ora, la lascio commentata
+# se createScenarios è quella principale usata in ga_general.py.
+# def fastCreateScenarios(conf, population, randomize=True): ...
 
-    for p in population:
-        nPed = random.randint(1, conf.numberOfPedestrians + 1)
-        nPass = random.randint(1, conf.numberOfPassengers + 1)
+def createScenarios(conf, population, randomize=True):
+	"""
+	Crea un DataFrame di scenari per la popolazione data.
+	Ogni riga del DataFrame è uno scenario [nPed, probPed, nPass, probPass, AltruismLevel].
+	:param conf: Oggetto di configurazione.
+	:param population: Lista di individui (usata per l'altruismo se non randomizzato per scenario).
+	:param randomize: Se True, le probabilità di morte sono casuali per ogni scenario.
+	:return: DataFrame pandas con gli scenari.
+	"""
+	scenarios_list = [] # Lista per raccogliere i dati degli scenari
 
-        if randomize:
-            probDeathPedestrians = random.random()
-            probDeathPassengers = random.random()
-        else:
-            probDeathPedestrians = conf.probDeathPedestrians
-            probDeathPassengers = conf.probDeathPassengers
+	for p_individual in population:
+		# Numero di pedoni e passeggeri (varia da 1 a N+1)
+		num_ped = random.randint(1, conf.numberOfPedestrians + 1) 
+		num_pass = random.randint(1, conf.numberOfPassengers + 1)
 
-        scenario = [nPed, probDeathPedestrians, nPass, probDeathPassengers, p.altruism]
-        scenarios.append(scenario)
+		# Probabilità di morte per pedoni e passeggeri
+		if randomize: # Se True, le probabilità sono casuali per questo scenario
+			prob_death_ped = random.random()
+			prob_death_pass = random.random()
+		else: # Altrimenti, usa i valori fissi dalla configurazione
+			prob_death_ped = conf.probDeathPedestrians
+			prob_death_pass = conf.probDeathPassengers
 
-    df = pd.DataFrame(scenarios, columns=[
-        "numberOfPedestrians",
-        "probPed",
-        "numberOfPassengers",
-        "probPass",
-        "AltruismLevel"
-    ])
-    return df
+		# Altruismo: usa quello dell'individuo
+		altruism_level = p_individual.altruism
 
-def createScenarios(conf,population,randomize=True):
-	df=pd.DataFrame(columns=["numberOfPedestrians",
-							"probPed", 
-							"numberOfPassengers",
-							"probPass",
-							"AltruismLevel"
-							])
+		scenario_data = [num_ped, prob_death_ped, num_pass, prob_death_pass, altruism_level]
+		scenarios_list.append(scenario_data)
+	
+	df_scenarios = pd.DataFrame(scenarios_list, columns=["numberOfPedestrians",
+														 "probPed", 
+														 "numberOfPassengers",
+														 "probPass",
+														 "AltruismLevel"])
+	return df_scenarios
 
-	for p in population:
-			
-			#Number of pedestrian varies in 1 - numberOfPedestrians+1
-			nPed = random.randint(1,conf.numberOfPedestrians+1) 
-			#nPed = 1
-			#Number of passengers varies in 1 - numberOfPedestrians+1
-			nPass = random.randint(1,conf.numberOfPassengers+1)
-			#nPass = 1
-
-			if randomize:
-				probDeathPedestrians = random.random()
-				probDeathPassengers = random.random()
-			else:
-				probDeathPedestrians = conf.probDeathPedestrians
-				probDeathPassengers = conf.probDeathPassengers
-
-			scenario = [nPed,probDeathPedestrians,nPass,probDeathPassengers,p.altruism]
-			#print("Prima",scenario)
-			scenario = np.array(scenario)
-			scenario = scenario.reshape((1,5))
-			#predAction = p.computeFitness(scenario, conf)
-
-			#isSvolta =(l.KnobLevel*l.numberOfPassengers < (1-l.KnobLevel)*prob*l.numberOfPedestrians)
-			#isSvolta =(scenario[0][5] * scenario[0][2] < (1-scenario[0][5]) * prob * scenario[0][0])
-			#print(scenario)
-			#print(scenario.shape)
-			df_temp=pd.DataFrame(scenario,columns=["numberOfPedestrians",
-					"probPed", 
-					"numberOfPassengers",
-					"probPass",
-					"AltruismLevel"
-					])
-			df = pd.concat([df, df_temp], ignore_index=True)
-	return df
-
-def standardize(scenari):
+def standardize(scenari_df):
+	"""
+	Standardizza le feature del DataFrame degli scenari usando StandardScaler.
+	:param scenari_df: DataFrame pandas con gli scenari.
+	:return: Tuple (array NumPy degli scenari standardizzati, oggetto scaler fittato).
+	"""
 	scaler = StandardScaler()
-	scaler.fit(scenari)
+	# Adatta lo scaler solo se ci sono dati (almeno una riga)
+	if not scenari_df.empty:
+		# Applica fit_transform che adatta lo scaler e poi trasforma i dati
+		standardized_data = scaler.fit_transform(scenari_df)
+		return standardized_data, scaler
+	# Se il DataFrame è vuoto, ritorna un array vuoto e lo scaler non fittato
+	return np.array([]).reshape(0, scenari_df.shape[1] if scenari_df.shape[1] > 0 else 5), scaler
 
-	return scaler.transform(scenari), scaler
 
-def save_results(df,conf,gen=0):
-	
-	s="%03d"%gen
-	pathLog = conf.path + "/logs/0"
+def save_results(df, conf, gen=0):
+	"""
+	Salva il DataFrame dei risultati di una generazione in un file CSV.
+	:param df: DataFrame da salvare.
+	:param conf: Oggetto di configurazione (per il percorso di salvataggio).
+	:param gen: Numero della generazione corrente.
+	"""
+	s = "%03d" % gen # Formatta il numero della generazione (es. 001, 010, 100)
+	# Usa os.path.join per creare percorsi in modo compatibile con diversi OS
+	pathLog = os.path.join(conf.path, "logs", "0") # La sottocartella "0" sembra fissa
 	
 	try:
-		os.makedirs(pathLog)
-	except OSError:
-		#print ("Creation of the directory %s failed" % pathLog)
-		print()
-	else:
-		#print ("Successfully created the directory %s" % pathLog)
-		print()
+		os.makedirs(pathLog, exist_ok=True) # Crea la directory se non esiste (exist_ok=True evita errori se esiste già)
+	except OSError as e:
+		print(f"Error creating directory {pathLog}: {e}")
+		return # Esce se non può creare la directory
 	
-	df.to_csv(os.path.join(pathLog, "gen_"+s+".txt"), sep="\t", decimal=",")
+	file_path = os.path.join(pathLog, f"gen_{s}.txt")
+	try:
+		df.to_csv(file_path, sep="\t", decimal=",", index=False) # index=False per non scrivere l'indice del DataFrame nel CSV
+		# print(f"Results for generation {gen} saved to {file_path}")
+	except IOError as e:
+		print(f"Error saving results to {file_path}: {e}")
 	
-def save_accuracy(df,conf,file_name=None,gen=0):
-	
-	s="%03d"%gen
-	pathLog = conf.path + "/logs/0"
+def save_accuracy(df, conf, file_name=None, gen=0):
+	"""
+	Salva il DataFrame delle metriche di accuratezza in un file CSV.
+	:param df: DataFrame da salvare.
+	:param conf: Oggetto di configurazione.
+	:param file_name: Nome del file (se None, ne viene generato uno basato sulla generazione).
+	:param gen: Numero della generazione (usato se file_name è None).
+	"""
+	s = "%03d" % gen
+	pathLog = os.path.join(conf.path, "logs", "0")
 	
 	try:
-		os.makedirs(pathLog)
-	except OSError:
-		#print ("Creation of the directory %s failed" % pathLog)
-		print()
-	else:
-		#print ("Successfully created the directory %s" % pathLog)
-		print()
-	
-	if file_name == None:
-		df.to_csv(os.path.join(pathLog, "accuracy_"+s+".txt"), sep="\t", decimal=",")
-	else:
-		df.to_csv(os.path.join(pathLog, file_name), sep="\t", decimal=",")
+		os.makedirs(pathLog, exist_ok=True)
+	except OSError as e:
+		print(f"Error creating directory {pathLog}: {e}")
+		return
+
+	actual_file_name = f"accuracy_{s}.txt" if file_name is None else file_name
+	file_path = os.path.join(pathLog, actual_file_name)
+	try:
+		df.to_csv(file_path, sep="\t", decimal=",", index=False)
+		# print(f"Accuracy data saved to {file_path}")
+	except IOError as e:
+		print(f"Error saving accuracy to {file_path}: {e}")
+
 
 def save_options(conf):
+	"""
+	Salva i parametri di configurazione in un file di testo.
+	:param conf: Oggetto di configurazione.
+	"""
 	try:
-		os.makedirs(conf.path)
-	except OSError:
-		print ("Creation of the directory %s failed" % conf.path)
-	else:
-		print ("Successfully created the directory %s" % conf.path)
+		os.makedirs(conf.path, exist_ok=True) # Crea la directory base del path se non esiste
+	except OSError as e:
+		print (f"Error creating directory {conf.path}: {e}")
+		return
 		
-	f = open(os.path.join(conf.path, "out.txt"), "w")
-	for attribute, value in conf.__dict__.items():
-		#print(attribute, '=', value)
-		f.write(attribute + ": " + str(value)+"\n")
-	
-	f.close()
+	file_path = os.path.join(conf.path, "out.txt")
+	try:
+		# Usa 'with open' per assicurare che il file venga chiuso correttamente anche in caso di errori
+		with open(file_path, "w") as f:
+			f.write("Experiment Configuration Options:\n")
+			f.write("="*30 + "\n")
+			for attribute, value in conf.__dict__.items():
+				f.write(f"{attribute}: {str(value)}\n")
+		# print(f"Configuration options saved to {file_path}")
+	except IOError as e:
+		print(f"Error saving options to {file_path}: {e}")

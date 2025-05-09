@@ -19,7 +19,7 @@ num_gen = 10
 # Primo comando
 command_1 = [
     "python3",
-    "Utilitarian/ga_utilitarian.py",
+    "Utilitarian/ga_general.py",
     "-g", str(num_gen),
     "-p", "100",
     "-r",

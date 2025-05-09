@@ -26,7 +26,6 @@ class Configuration:
 		self.HIDDEN_LAYER_MUTATION_RANGE = 0.01  # Apply Mutation of 1%
 		self.costPedestrian = 0.25	# cost of pedestrian c_s
 		self.costPassengers = 0.25 	# cost of passengers c_t
-		self.ALTRUISM = 0.1	# altruistic behavior
 		self.numberOfPedestrians=5	#numberOfPedons
 		self.numberOfPassengers=5	#numberOfPassengers
 		self.probDeathPedestrians = 1.0	#probDeathPedestrians
@@ -34,17 +33,10 @@ class Configuration:
 		self.STIGMA = -0.25
 		self.HONOR = 0.25
 		self.randomizeAltruism = False
-		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_probPed_"+str(self.probDeathPedestrians)+"_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
-		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_general_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
 		self.set_path("/Users/onga/git/-25-KMEA-/Utilitarian/outputTest")
 		self.set_best_candidates()
 		self.set_random_candidates()
 		
-	def set_altruism(self, altruism):
-		self.ALTRUISM = altruism
-		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_probPed_"+str(self.probDeathPedestrians)+"_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
-		#self.path="/Users/aloreggia/Downloads/test/500ge/tournament_tanh_reward_pythonTest_altruism_"+str(self.ALTRUISM)+"_general_pop_"+str(self.POPULATION_SIZE)+"_gen_"+str(self.MAX_GENERATIONS)
-		#self.set_path()
 		
 	def set_best_candidates(self):
 		self.BEST_CANDIDATES_COUNT = max(1, int(self.POPULATION_SIZE * self.best_ratio))  # Number of Best Candidates to Use
