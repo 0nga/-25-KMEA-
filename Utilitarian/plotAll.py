@@ -7,6 +7,7 @@ from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix,precision
 import argparse
 import shutil  # Import the shutil module for directory deletion
 
+# Elimina la directory grafici prima della creazione dei nuovi grafici
 def setup_output_directory(script_dir):
     output_dir = os.path.join(script_dir, "grafici")
 
@@ -156,6 +157,8 @@ def plot_accuracy(path, output_dir, params):
             print(f"Errore alla generazione {i}: {e}")
 
     if len(np.unique(y_true)) > 1:
+        # Decommenta per avere le ROC-AUC di ogni gen
+        '''
         ns_probs = np.random.randint(2, size=len(y_true))
         ns_fpr, ns_tpr, _ = roc_curve(y_true, ns_probs)
         lr_fpr, lr_tpr, _ = roc_curve(y_true, y_score)
@@ -169,6 +172,7 @@ def plot_accuracy(path, output_dir, params):
         plt.title(f"ROC Curve - Ultima Generazione (AUC = {roc_auc_score(y_true, y_score):.2f})")
         plt.savefig(os.path.join(output_dir, f"roc_curve_altruism_{params['altruismLevel']}.png"))
         plt.close()
+        '''
 
     accuracyList = pd.DataFrame(accuracy_data)
     accuracyList.generation = accuracyList.generation.astype('float64')
