@@ -5,10 +5,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix,precision_score, recall_score, f1_score
 import argparse
+import shutil  # Import the shutil module for directory deletion
+
 
 def setup_output_directory(script_dir):
     output_dir = os.path.join(script_dir, "grafici")
-    os.makedirs(output_dir, exist_ok=True)
+
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)  # Delete the directory and its contents
+
+    os.makedirs(output_dir, exist_ok=False)  # Recreate the directory
+
     return output_dir
 
 def read_parameters(path, max_gen=None):

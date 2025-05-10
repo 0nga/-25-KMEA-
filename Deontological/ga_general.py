@@ -71,6 +71,17 @@ def main():
 	# >>>>>> Inizio Algoritmo Genetico <<<<<<
 	print("\n********** Genetic Algorithm Starting **********")
 
+	# --- DELETE AND RECREATE OUTPUT DIRECTORY AT THE START ---
+	pathLog = os.path.join(conf.path, "logs", "0")
+	try:
+		if os.path.exists(pathLog):
+			shutil.rmtree(pathLog)
+		os.makedirs(pathLog, exist_ok=False)
+		print(f"Output directory {pathLog} cleaned and recreated.")
+	except OSError as e:
+		print(f"Error cleaning/creating output directory {pathLog}: {e}")
+		sys.exit(1) # Exit if there's an issue with the output directory
+
 	# Genera la prima popolazione di individui casualmente
 	population_new = generate_first_population_randomly(conf) # Funzione da Individual.py
 	
