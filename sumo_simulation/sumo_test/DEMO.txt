@@ -1,3 +1,9 @@
+
+Avvia xQuartz e poi lancia: 
+DISPLAY=:0 sumo-gui
+
+
+
 python3 $SUMO_HOME/share/sumo/tools/randomTrips.py -n test.net.xml -p 20 --persontrips -o pedestrians2.rou.xml
 
 python3 $SUMO_HOME/share/sumo/tools/randomTrips.py -n test.net.xml -p 50 --fringe-factor 100 -o cars2.rou.xml 

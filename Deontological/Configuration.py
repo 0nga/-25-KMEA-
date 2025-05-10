@@ -35,6 +35,7 @@ class Configuration:
 		self.STIGMA = -0.25
 		self.HONOR = 0.25
 		self.randomizeAltruism = False
+		self.savePassengers = -1 # se è settata a 0 ==> predAction = 0 SEMPRE, altrimenti predAction = 1
 
 		self.set_path("/Users/onga/git/-25-KMEA-/Deontological/outputTest")
 		self.set_best_candidates()
