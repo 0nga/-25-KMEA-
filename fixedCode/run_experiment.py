@@ -14,7 +14,7 @@ i = 2
 # Parametri
 i = 4
 prob = 0.1
-num_gen = 5
+num_gen = 10
 
 # Primo comando
 command_1 = [
@@ -47,5 +47,3 @@ result_2 = subprocess.run(command_2)
 
 # Controllo esito del secondo comando
 print("Comando 2 eseguito correttamente:", result_2.returncode == 0)
-
-

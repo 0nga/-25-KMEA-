@@ -14,8 +14,8 @@ i = 2
 # Parametri
 i = 4
 prob = 0.1
-num_gen = 5
-savePassengers = 0 # con 0 salvo i pedoni --> predAction = 1
+num_gen = 1000
+savePassengers = 1 # con 0 salvo i pedoni --> predAction = 1
 
 # Primo comando
 command_1 = [

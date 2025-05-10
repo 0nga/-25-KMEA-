@@ -1,6 +1,5 @@
 import os
 import random
-#import gym
 import pandas as pd
 import numpy as np
 import time
@@ -10,9 +9,7 @@ from keras import backend as K
 from Configuration import Configuration
 from sklearn.preprocessing import StandardScaler
 import copy
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import sys, getopt
 
 import random
 random.seed(42)
@@ -37,27 +34,20 @@ class Individual:
 			self.altruism = conf.ALTRUISM
 
 		self.knob = random.random()
-		#print("Knob initialization",self.knob)
 
 	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
 		self.scenario = copy.deepcopy(scenario)
-		# Standardization of the input for NN
-		scenario_copia=copy.deepcopy(scenario)
-		#scenario_copia[0][0]=(scenario_copia[0][0]-3.5)/1.7
-		#scenario_copia[0][2]=(scenario_copia[0][2]-3.5)/1.7
 
-		#print("Scenario pre predict ",scenario_copia)
+		# Standardization of the input for NN
+		scenario_copia = copy.deepcopy(scenario)
+
 		self.knob = self.nn.predict(scenario_copia)[0][0]
 		if self.knob > 1: self.knob = 1
 		if self.knob < 0: self.knob = 0
 
-		#print(f"prima {scenario}")
 		scenario = scaler.inverse_transform(scenario)
-		#print(f"dopo {scenario}")
-		#print("Predicction ",self.nn.predict(scenario_copia))
-		
 
-		#Evaluate scenario
+		# Evaluate scenario
 		evaluatePedestrian = scenario[0][0] * scenario[0][1]
 		evaluatePassengers = scenario[0][2] * scenario[0][3]
 		# Check whether the cost should be computed or not
@@ -67,7 +57,7 @@ class Individual:
 		if (evaluatePedestrian > evaluatePassengers):
 			computeCost = 1
 		
-		#predAction=1 means turn, predAction=0 means go straight
+		# predAction=1 means turn, predAction=0 means go straight
 		self.predAction = 0
 		if (self.knob * evaluatePassengers < evaluatePedestrian * (1-self.knob)):
 			self.predAction = 1
@@ -77,12 +67,12 @@ class Individual:
 		temp_numberOfPedestrians = scenario[0][0]
 		temp_numberOfPassengers = scenario[0][2]
 		
-		#Check scenario response, whether or not pedestrian are injuried
+		# Check scenario response, whether or not pedestrian are injuried
 		scenarioDice = random.random()
 		dead = 0
 
-		probDeath=0
-		if self.predAction==0:
+		probDeath = 0
+		if self.predAction == 0:
 			probDeath = scenario[0][1]
 		else:
 			probDeath = scenario[0][3]
@@ -92,16 +82,15 @@ class Individual:
 		
 		'''
 		REMEMBER: WHEN THE UTILITY FUNCTION CHANGES YOU SHOULD ALSO CHANGE LINE 118 AND 119 IN GA_GENERAL
-		
 		'''
-		if self.predAction==0:
-			#utility = (temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism   - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead )
+		if self.predAction == 0:
+			# utility = (temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism   - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead )
 			utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism) - (temp_numberOfPassengers * selfish * (1 - scenario[0][3]) + temp_numberOfPedestrians * self.altruism ) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead 
-			#utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism - dead * temp_numberOfPedestrians * (self.altruism + computeCost * conf.costPedestrian)) 
+			# utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism - dead * temp_numberOfPedestrians * (self.altruism + computeCost * conf.costPedestrian)) 
 		else:
-			#utility = (temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish)
+			# utility = (temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish)
 			utility = (temp_numberOfPassengers * selfish * (1 - dead) + temp_numberOfPedestrians * self.altruism) - (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism * (1 - scenario[0][1]) - temp_numberOfPedestrians * computeCost * conf.costPedestrian * scenario[0][1] )
-			#utility = ((1-dead)*temp_numberOfPassengers * selfish  - dead * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
+			# utility = ((1-dead)*temp_numberOfPassengers * selfish  - dead * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
 		
 		# This is used to normalize the fitness value into 0-1
 		'''utility_straight_max_pass=((conf.numberOfPassengers+1) * selfish - 1 * self.altruism)
@@ -136,11 +125,10 @@ class Individual:
 		
 		range_utility=(utility_max_value-utility_min_value)
 		
-		#self.fitness = (utility-utility_min_value)/range_utility + reward
-		#self.fitness = utility 
+		# self.fitness = (utility-utility_min_value)/range_utility + reward
+		# self.fitness = utility 
 		self.fitness = (utility - utility_min_value)/range_utility
 					
-		#print(f"Action: {predAction} \tknob: {self.knob:.4f} \tPed: {temp_numberOfPedestrians:.4f} \tPass: {temp_numberOfPassengers:.4f} \tdead: {dead} \treward: {reward} \tfitness: {self.fitness:.4f}")
 		return self.predAction
 
 	def computeSelfEsteem(self, conf, avgKnobLevel):
@@ -151,7 +139,7 @@ class Individual:
 		#Evaluate scenario
 		evaluatePedestrian = self.scenario[0][0] * self.scenario[0][1]
 		evaluatePassengers = self.scenario[0][2] * self.scenario[0][3]
-		#print(f"avgKnobLevel: {avgKnobLevel}")
+
 		if(avgKnobLevel * evaluatePassengers < evaluatePedestrian * (1-avgKnobLevel)):
 			avgAction = 1
 			
@@ -180,22 +168,11 @@ def make_nn_individual():
 	m_model=Model(inp, out)'''
 	
 	m_model.add(Dense(3, input_dim=5))
-	#m_model.add(Dense(5,  activation='relu')) prova anche questo
-	#m_model.add(Dense(1,  activation='tanh'))
 	m_model.add(Dense(1))
 
 	# Compile Neural Network
-	m_model.compile(optimizer='adam', loss='categorical_crossentropy')
-	# provare con loss='mse'
+	m_model.compile(optimizer='adam', loss='mse')
 	
-	'''
-	CHATGPT
-	Problemi nel codice:
-	loss='categorical_crossentropy':
-	Questo tipo di loss è usato per classificazione multi-classe con one-hot encoding.
-	Ma il modello ha un solo output Dense(1), quindi probabilmente serve un'altra loss function.
-	'''
-	#m_model.summary()
 	return m_model
 
 def generate_first_population_randomly(conf):
@@ -230,6 +207,7 @@ def mutate_chromosome(conf,individual=None):
 		weights = l.get_weights()
 		for i in range(len(weights[0])):
 			for j in range(len(weights[0][i])):
+				
 				#Compute random value in the delta interval
 				if random.random() < conf.HIDDEN_LAYER_MUTATION_PROBABILITY:
 					delta = weights[0][i][j] * conf.HIDDEN_LAYER_MUTATION_RANGE
@@ -238,9 +216,6 @@ def mutate_chromosome(conf,individual=None):
 		l.set_weights(weights)
 	return individual
 
-
-# Suggerimento: Se vuoi un comportamento più realistico biologicamente, potresti usare un crossover uniforme 
-# con probabilità, o una media pesata (es. interpolazione tra geni). Fammi sapere se vuoi un esempio di quello.
 def generate_children(conf,mother: Individual, father: Individual) -> Individual:
 	"""
 	Generate a New Children based Mother and Father Genomes
@@ -280,14 +255,7 @@ def tournament_selection(population,selectionSize):
 
 	list_index_a = random.sample(range(len(population)), selectionSize)
 	list_index_b = random.sample(range(len(population)), selectionSize)
-	
-	'''print("Original")
-	print([p.fitness for p in population])
-	print("A")
-	print([p.fitness for p in population_a])
-	print("B")
-	print([p.fitness for p in population_b])'''
-	
+
 	population_result = []
 
 	for i in range(selectionSize):
@@ -297,11 +265,7 @@ def tournament_selection(population,selectionSize):
 			population_result.append(population[index_a])
 		else:
 			population_result.append(population[index_b])
-			
-	'''print("result")
-	print([p.fitness for p in population_result])		
-	sys.exit()'''
-	
+		
 	return population_result
 				
 def evolve_population(population, conf, crossover=True, elite=0):
@@ -346,36 +310,6 @@ def evolve_population(population, conf, crossover=True, elite=0):
 
 	return new_population
 
-def fastCreateScenarios(conf, population, randomize=True):
-    import pandas as pd
-    import numpy as np
-    import random
-
-    scenarios = []
-
-    for p in population:
-        nPed = random.randint(1, conf.numberOfPedestrians + 1)
-        nPass = random.randint(1, conf.numberOfPassengers + 1)
-
-        if randomize:
-            probDeathPedestrians = random.random()
-            probDeathPassengers = random.random()
-        else:
-            probDeathPedestrians = conf.probDeathPedestrians
-            probDeathPassengers = conf.probDeathPassengers
-
-        scenario = [nPed, probDeathPedestrians, nPass, probDeathPassengers, p.altruism]
-        scenarios.append(scenario)
-
-    df = pd.DataFrame(scenarios, columns=[
-        "numberOfPedestrians",
-        "probPed",
-        "numberOfPassengers",
-        "probPass",
-        "AltruismLevel"
-    ])
-    return df
-
 def createScenarios(conf,population,randomize=True):
 	df=pd.DataFrame(columns=["numberOfPedestrians",
 							"probPed", 
@@ -401,15 +335,14 @@ def createScenarios(conf,population,randomize=True):
 				probDeathPassengers = conf.probDeathPassengers
 
 			scenario = [nPed,probDeathPedestrians,nPass,probDeathPassengers,p.altruism]
-			#print("Prima",scenario)
+
 			scenario = np.array(scenario)
 			scenario = scenario.reshape((1,5))
 			#predAction = p.computeFitness(scenario, conf)
 
 			#isSvolta =(l.KnobLevel*l.numberOfPassengers < (1-l.KnobLevel)*prob*l.numberOfPedestrians)
 			#isSvolta =(scenario[0][5] * scenario[0][2] < (1-scenario[0][5]) * prob * scenario[0][0])
-			#print(scenario)
-			#print(scenario.shape)
+	
 			df_temp=pd.DataFrame(scenario,columns=["numberOfPedestrians",
 					"probPed", 
 					"numberOfPassengers",
@@ -433,10 +366,8 @@ def save_results(df,conf,gen=0):
 	try:
 		os.makedirs(pathLog)
 	except OSError:
-		#print ("Creation of the directory %s failed" % pathLog)
 		print()
 	else:
-		#print ("Successfully created the directory %s" % pathLog)
 		print()
 	
 	df.to_csv(os.path.join(pathLog, "gen_"+s+".txt"), sep="\t", decimal=",")
@@ -449,10 +380,8 @@ def save_accuracy(df,conf,file_name=None,gen=0):
 	try:
 		os.makedirs(pathLog)
 	except OSError:
-		#print ("Creation of the directory %s failed" % pathLog)
 		print()
 	else:
-		#print ("Successfully created the directory %s" % pathLog)
 		print()
 	
 	if file_name == None:
@@ -469,8 +398,8 @@ def save_options(conf):
 		print ("Successfully created the directory %s" % conf.path)
 		
 	f = open(os.path.join(conf.path, "out.txt"), "w")
-	for attribute, value in conf.__dict__.items():
-		#print(attribute, '=', value)
-		f.write(attribute + ": " + str(value)+"\n")
 	
+	for attribute, value in conf.__dict__.items():
+		f.write(attribute + ": " + str(value)+"\n")
+
 	f.close()
