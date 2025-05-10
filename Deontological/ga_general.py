@@ -28,19 +28,19 @@ def main():
 	# Gestione dei flag passati nel comando
 	try:
 		# Definisci gli argomenti attesi (h per help, a per altruism, ecc.)
-		opts, args = getopt.getopt(sys.argv[1:], "ha:o:g:p:e:r", 
-									["help", "altruism=", "output=", "gen=", "population=", "probped=", "randomizealtruism"])
+		opts, args = getopt.getopt(sys.argv[1:], "ha:o:g:p:e:s:r", 
+									["help", "altruism=", "output=", "gen=", "population=", "probped=", "randomizealtruism", "savePassengers="])
 	except getopt.GetoptError as err:
 		print(f"Error parsing options: {err}")
 		# Stampa un messaggio di aiuto se gli argomenti non sono validi
-		print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] [-o <outputPath>]")
+		print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] -s <savePassengers> [-o <outputPath>]")
 		sys.exit(2)
 
 	# Elabora gli argomenti passati
 	# print(f"Arguments received: {opts}") # Debug
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
-			print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] [-o <outputPath>]")
+			print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> -s <savePassengers> [-r] [-a <altruismLevel>] [-o <outputPath>]")
 			sys.exit()
 		elif opt in ("-a", "--altruism"):	
 			conf.set_altruism(float(arg))
@@ -57,9 +57,13 @@ def main():
 		elif opt in ("-e", "--probped"): # Probabilità di morte dei pedoni (se non randomizzata per scenario)
 			conf.probDeathPedestrians = float(arg)
 			print(f"Configuration: Default probDeathPedestrians set to {conf.probDeathPedestrians}")
+		elif opt in ("-s", "--savePassengers"): # Flag per decidere l'approccio deontologico	
+			conf.savePassengers = int(arg)
+			print(f"Configuration: savePassengers set to {conf.savePassengers}")
 		elif opt in ("-r", "--randomizealtruism"): # Flag per randomizzare l'altruismo degli individui	
 			conf.randomizeAltruism = True
 			print(f"Configuration: Individual altruism will be randomized.")
+
 		
 	# Salvataggio delle opzioni di configurazione correnti
 	save_options(conf) # Funzione definita in Individual.py
@@ -112,7 +116,7 @@ def main():
 				# Lo scaler è passato per permettere la denormalizzazione all'interno di computeFitness.
 				action = individual_p.computeFitness(current_scenario_std_for_individual, conf, scaler)
 				
-				predAction_list_current_gen.append(action) # Sarà sempre 0
+				predAction_list_current_gen.append(action) # Sarà sempre 0 o sempre 1
 				fitness_list_current_gen.append(individual_p.fitness)
 				knob_list_current_gen.append(individual_p.knob) # Output grezzo della NN
 			else:

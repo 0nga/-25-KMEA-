@@ -14,7 +14,9 @@ class Configuration:
 		self.HIDDEN_LAYER_TYPE = ['dense']
 		self.MODEL_OPTIMIZER = ['adam', 'rmsprop']
 
+
 		# Define Genetic Algorithm Parameters
+		self.savePassengers = -1  # Valore di default
 		self.MAX_GENERATIONS = 3  # Max Number of Generations to Apply the Genetic Algorithm
 		self.POPULATION_SIZE = 5  # Max Number of Individuals in Each Population
 		self.best_ratio = 0.8
@@ -33,6 +35,7 @@ class Configuration:
 		self.STIGMA = -0.25
 		self.HONOR = 0.25
 		self.randomizeAltruism = False
+
 		self.set_path("/Users/onga/git/-25-KMEA-/Deontological/outputTest")
 		self.set_best_candidates()
 		self.set_random_candidates()

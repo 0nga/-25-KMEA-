@@ -15,6 +15,7 @@ i = 2
 i = 4
 prob = 0.1
 num_gen = 10
+savePassengers = 1 # con 0 salvo i pedoni --> predAction = 1
 
 # Primo comando
 command_1 = [
@@ -24,6 +25,7 @@ command_1 = [
     "-p", "100",
     "-r",
     "-e", str(prob),
+    "-s", str(savePassengers),
     "-o", "Deontological/outputTest"
 ]
 
