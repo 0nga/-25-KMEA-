@@ -1,0 +1,13 @@
+Per aumentare la dimensione del pedone aggiungi vtypes
+
+<?xml version="1.0" encoding="UTF-8"?>
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" avoidOverlap="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-61.29,-26.41,66.12,33.36" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,1000000000.00" projParameter="!"/>
+
+    <vTypes>
+        <vType id="DEFAULT_PEDTYPE" vClass="pedestrian" length="1.0" width="1.0"/>
+    </vTypes>
+
+    <edges>
+        </edges>

@@ -1,0 +1,7 @@
+<configuration>
+    <input>
+        <net-file value="trolleyNet.net.xml"/>
+        <route-files value="trolleyNet.rou.xml"/>
+        <additional-files value="trolleyNet.add.xml"/>
+    </input>
+</configuration>
