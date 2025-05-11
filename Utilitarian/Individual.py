@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 import copy
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import random
+import shutil  # Import the shutil module
 
 random.seed(42)
 
@@ -25,29 +26,45 @@ class Individual:
 		self.predAction = -1 # Azione predetta (-1: non ancora calcolata, 0: dritto, 1: svolta)
 		self.scenario = None # Scenario corrente affrontato dall'individuo
 
+
 		if conf.randomizeAltruism:
 			self.altruism = random.random()
 		else:
 			self.altruism = conf.ALTRUISM
-		
+				
 		self.knob = random.random()
 
 	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
 		"""
 		Calcola la fitness dell'individuo basata sullo scenario corrente.
-		L'auto andrà SEMPRE DRITTA (approccio deontologico).
-		Lo scaler è usato per denormalizzare i valori dello scenario per i calcoli di utilità.
+		L'auto andrà SEMPRE DRITTA o SVOLTERÀ SEMPRE (approccio deontologico).
 		"""
-		self.scenario = copy.deepcopy(scenario) # Salva una copia dello scenario (standardizzato)
-		
-		# --- MODIFICA DEONTOLOGICA CHIAVE ---
+		self.scenario = copy.deepcopy(scenario)
+		# --- DEONTOLOGICAL APPROACH ---
 		# L'auto va sempre dritta, indipendentemente dall'output della NN (knob).
-		# predAction = 0 significa andare dritto.
-		# predAction = 1 significherebbe svoltare.
-		self.predAction = 1
-		# --- FINE MODIFICA DEONTOLOGICA ---
-		return self.predAction # Ritorna l'azione (sempre 0)
+		# predAction = 0 significa andare dritto e salvare i passeggeri
+		# predAction = 1 significherebbe svoltare e salvare i pedoni
+		scenario_denormalized = scaler.inverse_transform(scenario)
+		
+		num_pedestrians = scenario_denormalized[0][0]
+		prob_death_pedestrians = scenario_denormalized[0][1]
+		num_passengers = scenario_denormalized[0][2]
+		prob_death_passengers = scenario_denormalized[0][3]
 
+		evaluatePedestrianDamagePotential = num_pedestrians * prob_death_pedestrians
+		evaluatePassengersDamagePotential = num_passengers * prob_death_passengers
+
+		if (evaluatePedestrianDamagePotential > evaluatePassengersDamagePotential):
+			self.predAction = 1
+		else:
+			self.predAction = 0  # Svoltare
+		
+		#print("SAVE PASSENGERS:", str(conf.savePassengers))
+		#print("Predicted Action:", str(self.predAction))
+		return self.predAction # Ritorna l'azione (sempre 0 o sempre 1)
+
+
+	# NON USATA: non c'è una funzione fitness
 	def computeSelfEsteem(self, conf, avgKnobLevel):
 		"""
 		Aggiorna la fitness dell'individuo basandosi su onore e stigma.

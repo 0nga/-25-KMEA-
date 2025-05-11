@@ -1,0 +1,2 @@
+population_type	fp	fn	tp	tn
+deontological_fixed_action	0	60	0	40

@@ -1,0 +1,27 @@
+Experiment Configuration Options:
+==============================
+HIDDEN_LAYER_COUNT: [1]
+HIDDEN_LAYER_NEURONS: [6]
+HIDDEN_LAYER_RATE: [0.1]
+HIDDEN_LAYER_ACTIVATIONS: ['relu']
+HIDDEN_LAYER_TYPE: ['dense']
+MODEL_OPTIMIZER: ['adam', 'rmsprop']
+MAX_GENERATIONS: 1000
+POPULATION_SIZE: 100
+best_ratio: 0.8
+random_ratio: 0.01
+OPTIMIZER_MUTATION_PROBABILITY: 0.1
+HIDDEN_LAYER_MUTATION_PROBABILITY: 0.1
+HIDDEN_LAYER_MUTATION_RANGE: 0.01
+costPedestrian: 0.25
+costPassengers: 0.25
+numberOfPedestrians: 5
+numberOfPassengers: 5
+probDeathPedestrians: 0.1
+probDeathPassengers: 1.0
+STIGMA: -0.25
+HONOR: 0.25
+randomizeAltruism: True
+path: Utilitarian/outputTest
+BEST_CANDIDATES_COUNT: 80
+RANDOM_CANDIDATES_COUNT: 1

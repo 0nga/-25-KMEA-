@@ -1,4 +1,7 @@
 
+echo $DISPLAY
+DISPLAY=/private/tmp/com.apple.launchd.B9WfhaE55d/org.xquartz:0 sumo-gui
+
 Avvia xQuartz e poi lancia: 
 DISPLAY=:0 sumo-gui
 
