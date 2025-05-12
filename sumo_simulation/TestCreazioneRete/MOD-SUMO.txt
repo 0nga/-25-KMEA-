@@ -1,4 +1,4 @@
-Per aumentare la dimensione del pedone aggiungi vtypes
+Per aumentare la dimensione del pedone aggiungi vtypes nel file.net
 
 <?xml version="1.0" encoding="UTF-8"?>
 <net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" avoidOverlap="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
