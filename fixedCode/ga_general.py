@@ -15,7 +15,6 @@ import sys, getopt
 
 import random
 random.seed(42)
-
 	
 def main():
 

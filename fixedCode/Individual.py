@@ -6,7 +6,6 @@ import time
 from keras.models import Sequential,Model
 from keras.layers import Dense, Dropout, InputLayer, Input
 from keras import backend as K
-from Configuration import Configuration
 from sklearn.preprocessing import StandardScaler
 import copy
 
@@ -320,12 +319,8 @@ def createScenarios(conf,population,randomize=True):
 
 	for p in population:
 			
-			#Number of pedestrian varies in 1 - numberOfPedestrians+1
 			nPed = random.randint(1,conf.numberOfPedestrians+1) 
-			#nPed = 1
-			#Number of passengers varies in 1 - numberOfPedestrians+1
 			nPass = random.randint(1,conf.numberOfPassengers+1)
-			#nPass = 1
 
 			if randomize:
 				probDeathPedestrians = random.random()

@@ -1,9 +1,4 @@
 import subprocess
-import os
-import numpy as np
-import seaborn as sns
-import pandas as pd
-import matplotlib.pyplot as plt
 
 end_value = 6
 prob_value = (1.0, 0.8, 0.5, 0.1)
