@@ -122,7 +122,7 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
 lista_attivi = []
 step_count = 0  # Inizializza il contatore
 simulation_time = 0  # Inizializza il tempo di simulazione
-max_simulation_time = 10  # Definisci la durata massima della simulazione in secondi
+max_simulation_time = 150  # Definisci la durata massima della simulazione in secondi
 
 while simulation_time < max_simulation_time:
 
@@ -133,6 +133,7 @@ while simulation_time < max_simulation_time:
 
     for v1 in t.vehicle.getIDList():
         for p1 in t.person.getIDList():
+            print("calcolo la distanza fra ", v1, " e ", p1)
             calculate_and_store_distance(v1, p1, step_count)  # Calcola e memorizza la distanza
 
     for collision in collisions:
@@ -151,7 +152,7 @@ while simulation_time < max_simulation_time:
         for collision in collisions:
             print(collision)
 
-# Chiama la funzione per generare i grafici dopo la chiusura della simulazione
+#Creazione grafici
 if distance_data_t0:
     plot_distances(distance_data_t0, pair_names, simulation_steps, "Distanza Pedoni - Auto t_0")
 if distance_data_t1:

@@ -7,13 +7,19 @@
     
     <!-- Pedestrians (sorted by depart) -->
 
-    <person id="p_0" depart="0.00">
+    <person id="p_0" depart="0.00" type="fast_pedestrian">
         <personTrip from="-E4" to="E6"/>
     </person>
     <person id="p_1" depart="0.00">
         <personTrip from="-E4" to="E6"/>
     </person>
     <person id="p_2" depart="0.00">
+        <personTrip from="-E4" to="E6"/>
+    </person>
+    <person id="p_3" depart="0.00">
+        <personTrip from="-E4" to="E6"/>
+    </person>
+    <person id="p_4" depart="0.00">
         <personTrip from="-E4" to="E6"/>
     </person>
     

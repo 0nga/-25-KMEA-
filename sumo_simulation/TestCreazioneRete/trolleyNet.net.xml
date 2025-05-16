@@ -40,6 +40,11 @@
 
     <location netOffset="0.00,0.00" convBoundary="-61.29,-26.41,66.12,33.36" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
 
+   <vTypes>
+        <vType id="default_pedestrian" vClass="pedestrian" length="2.0" width="1.5"/>
+        <vType id="fast_pedestrian" vClass="pedestrian" speedFactor="2.2" length="2.0" width="1.5"/>
+    </vTypes>
+
     <edge id=":J0_w0" function="walkingarea">
         <lane id=":J0_w0_0" index="0" allow="pedestrian" speed="2.78" length="11.60" width="2.00" shape="-61.21,-5.52 -61.19,-7.52 -61.35,6.08 -61.33,4.08"/>
     </edge>
