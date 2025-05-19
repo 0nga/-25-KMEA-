@@ -16,6 +16,35 @@ import sys, getopt
 import random
 random.seed(42)
 	
+def save_final_generation_models(population, conf):
+    """
+    Saves the Keras models of the individuals in the final generation
+    to a dedicated directory.
+
+    Args:
+        population: List of Individual objects representing the final generation.
+        conf: Configuration object containing simulation settings.
+    """
+    models_path = os.path.join(conf.path, "final_generation_models")
+    try:
+        os.makedirs(models_path, exist_ok=True)  # Create the directory if it doesn't exist
+        print(f"Saving final generation models to: {models_path}")
+    except OSError as e:
+        print(f"Error creating directory {models_path}: {e}")
+        return  # Exit the function if directory creation fails
+
+    for i, individual in enumerate(population):
+        if hasattr(individual, 'nn') and individual.nn is not None: # Check if the individual has a neural network
+            model_filename = f"individual_{i}.keras"
+            model_filepath = os.path.join(models_path, model_filename)
+            try:
+                individual.nn.save(model_filepath)
+                print(f"  Saved model: {model_filename}")
+            except Exception as e:
+                print(f"  Error saving model {model_filename}: {e}")
+        else:
+            print(f"  Individual {i} does not have a neural network.")
+
 def main():
 
 	# Creo l'oggetto che conterrà la configurazione
@@ -158,6 +187,9 @@ def main():
 		# >>>>>> Genetic Selection, Children Creation and Mutation <<<<<<
 		population_new = evolve_population(population,conf)
 
+	# Salva i modelli dell'ultima generazione
+	save_final_generation_models(population, conf) # Chiamata alla nuova funzione
+
 	columns_to_drop = ["Unnamed: 0", "KnobLevel", "Fitness", "convieneSvolta", "predAction"]
 	df_temp = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
 	df_temp, _ = standardize(df_temp) 
@@ -200,3 +232,4 @@ if __name__ == "__main__":
 	main()
 	simulation_stop = time.time()
 	print(f"Done > Takes {simulation_stop - simulation_start} sec")
+

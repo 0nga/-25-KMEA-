@@ -9,6 +9,7 @@ import shutil  # Import the shutil module for directory deletion
 
 # Elimina la directory grafici prima della creazione dei nuovi grafici
 def setup_output_directory(script_dir):
+
     output_dir = os.path.join(script_dir, "grafici")
 
     if os.path.exists(output_dir):
@@ -17,6 +18,8 @@ def setup_output_directory(script_dir):
     os.makedirs(output_dir, exist_ok=False)  # Recreate the directory
 
     return output_dir
+
+
 def read_parameters(path, max_gen=None):
     params = {
         'altruismLevel': -1,
