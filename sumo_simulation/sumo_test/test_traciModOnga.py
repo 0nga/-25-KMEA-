@@ -1,23 +1,23 @@
 import os
 import sys
 import random
-import time
 from keras.models import load_model
 import traci
-import sumolib
 import matplotlib.pyplot as plt
+import shutil
 import numpy as np
+import xml.etree.ElementTree as ET
 
 # Carico Rete neurale
 try:
-    model_name = "sumo_simulation/sumo_test/final_generation_models/individual_0.keras"
+    model_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sumo_simulation", "sumo_test", "final_generation_models", "individual_0.keras")    
     model = load_model(model_name)
     print("Modello caricato con successo da", model_name)
     model.summary()
 
 except Exception as e:
     print(f"Si è verificato un errore durante il caricamento del modello: {e}")
-    model = None  # Imposta model a None per gestire il caso di errore
+    model = None
 
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'share/sumo/tools')
@@ -31,15 +31,9 @@ def removeID(lista, x):
         lista.remove(x)
     return lista
 
-def plot_distances(distance_data, pair_names, simulation_steps, title):
-    """
-    Genera un grafico che mostra l'andamento delle distanze nel tempo per ogni coppia veicolo-pedone.
-    Args:
-        distance_data (dict): Dizionario contenente i dati delle distanze.
-        pair_names (dict): Dizionario contenente i nomi dei veicoli e pedoni per ogni coppia.
-        simulation_steps (list): Lista dei passi di simulazione.
-        title (str): Titolo del grafico.
-    """
+
+def plot_distances(distance_data, pair_names, simulation_steps, title, save_dir="grafici"):
+    """Genera un grafico e lo salva nella directory specificata."""
     plt.figure(figsize=(10, 6))
     plt.xlabel("Tempo (passi di simulazione)")
     plt.ylabel("Distanza (metri)")
@@ -50,64 +44,48 @@ def plot_distances(distance_data, pair_names, simulation_steps, title):
         print("Nessun dato di distanza da graficare.")
         return
 
-    # Trova il numero massimo di passi di simulazione per uniformare l'asse x
     max_steps = len(simulation_steps)
-    x_values = range(1, max_steps + 1)  # Crea una lista di valori x da 1 al numero massimo di passi
+    x_values = range(1, max_steps + 1)
 
-    # Itera sulle coppie veicolo-pedone
     for pair_key, distances in distance_data.items():
         vehicle_name, person_name = pair_names[pair_key]
-        # Estendi la lista delle distanze con l'ultimo valore per farla corrispondere alla lunghezza di x_values
         if len(distances) < max_steps:
             last_distance = distances[-1]
             distances_extended = distances + [last_distance] * (max_steps - len(distances))
         else:
             distances_extended = distances
-        plt.plot(x_values, distances_extended, label=f"Pedone: {person_name}")  # Modificato: solo pedone nella legenda
+        plt.plot(x_values, distances_extended, label=f"Pedone: {person_name}")
 
     plt.legend()
-    plt.show()
+    os.makedirs(save_dir, exist_ok=True)
+    filename = f"{title.replace(' ', '_')}.png"
+    filepath = os.path.join(save_dir, filename)
+    plt.savefig(filepath)
+    plt.close()
+    print(f"Grafico salvato in: {filepath}")
 
 
 def defineScenario(dbase, vehicleID):
-    dbase[vehicleID] = {'nPassenger': random.randint(0, 5)}
+    dbase[vehicleID] = {'nPassenger': random.randint(0, 5),
+                        'probPassenger': random.uniform(0, 1),
+                        'nPedestrian': random.randint(0, 5),
+                        'probPedestrian': random.uniform(0, 1),
+                        'altruism': random.uniform(0, 1),
+                        }
+    return dbase[vehicleID]['nPedestrian'] # Restituisci il numero di pedoni
 
-
-# Inizializza la connessione SUMO
-t = traci.connect(27910)
-
-# Dizionari per memorizzare i dati delle distanze nel tempo, separati per veicolo
-distance_data_t0 = {}
-distance_data_t1 = {}
-
-# Dizionario per memorizzare i nomi dei veicoli e pedoni coinvolti nel calcolo della distanza
-pair_names = {}
-
-# Contatore per il passo di simulazione, utile per l'asse x del grafico
-simulation_steps = []
 
 def calculate_and_store_distance(vehicle_id, person_id, step):
-    """
-    Calcola la distanza tra un veicolo e un pedone, la memorizza insieme al tempo,
-    e gestisce i dati per il grafico.
-
-    Args:
-        vehicle_id (str): L'ID del veicolo.
-        person_id (str): L'ID del pedone.
-        step (int): Il passo di simulazione corrente.
-    """
-    global distance_data_t0, distance_data_t1, pair_names, simulation_steps  # Modificato per i dizionari separati
+    """Calcola la distanza tra un veicolo e un pedone e la memorizza."""
+    global distance_data_t0, distance_data_t1, pair_names, simulation_steps
     posV = t.vehicle.getPosition(vehicle_id)
     posP = t.person.getPosition(person_id)
     distance = t.simulation.getDistance2D(posV[0], posV[1], posP[0], posP[1], isDriving=True)
-    # minGap = t.vehicle.getMinGap(vehicle_id) #Non usato
 
-    # Crea una chiave univoca per la coppia veicolo-pedone
     pair_key = f"{vehicle_id}-{person_id}"
     if pair_key not in pair_names:
-        pair_names[pair_key] = (vehicle_id, person_id)  # Salva i nomi della coppia
+        pair_names[pair_key] = (vehicle_id, person_id)
 
-    # Inizializza la lista delle distanze per questa coppia, se non esiste
     if vehicle_id == "t_0":
         if pair_key not in distance_data_t0:
             distance_data_t0[pair_key] = []
@@ -117,24 +95,85 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
             distance_data_t1[pair_key] = []
         distance_data_t1[pair_key].append(distance)
 
-    simulation_steps.append(step)  # Salva il passo della simulazione
+    simulation_steps.append(step)
+
+
+def modify_pedestrian_routes(route_file, num_pedestrians):
+    """Modifica il file di route dei pedoni in base al numero specificato."""
+    tree = ET.parse(route_file)
+    root = tree.getroot()
+
+    # Rimuovi tutti gli elementi 'person' esistenti
+    for person in root.findall('person'):
+        root.remove(person)
+
+    # Aggiungi nuovi elementi 'person' in base a num_pedestrians
+    for i in range(num_pedestrians):
+        person = ET.SubElement(root, "person", id=f"p_{i}", depart="0.00")
+        person_trip = ET.SubElement(person, "personTrip", attrib={"from": "-E4", "to": "E6"})
+
+    # Scrivi le modifiche nel file (sovrascrivendo l'originale)
+    tree.write(route_file, encoding="UTF-8", xml_declaration=True)
+    print(f"File delle route dei pedoni '{route_file}' modificato con {num_pedestrians} pedoni.")
+
+
+# --- Directory dei grafici ---
+save_dir = "grafici"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+save_path = os.path.join(script_dir, save_dir)
+
+if os.path.exists(save_path):
+    shutil.rmtree(save_path)
+os.makedirs(save_path)
+# --- Fine Directory dei grafici ---
+
+# Inizializza SUMO
+t = traci.connect(27910)
+
+# Dati per i grafici
+distance_data_t0 = {}
+distance_data_t1 = {}
+pair_names = {}
+simulation_steps = []
 
 lista_attivi = []
-step_count = 0  # Inizializza il contatore
-simulation_time = 0  # Inizializza il tempo di simulazione
-max_simulation_time = 150  # Definisci la durata massima della simulazione in secondi
+step_count = 0
+simulation_time = 0
+max_simulation_time = 40
+
+# --- Genera lo scenario UNA SOLA VOLTA e ottieni il numero di pedoni ---
+dbase = {}
+
+for i in range(1, 10):
+    num_pedestrians_scenario = defineScenario(dbase, "t_1")
+
+# Modifica il file delle route dei pedoni
+pedestrian_route_file = "TestCreazioneRete/trolleyNetPed.rou.xml"
+pedestrian_route_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), pedestrian_route_file)
+modify_pedestrian_routes(pedestrian_route_file, num_pedestrians_scenario)
+
+scenario = np.array([
+    dbase["t_1"]["nPassenger"],
+    dbase["t_1"]["probPassenger"],
+    dbase["t_1"]["nPedestrian"],
+    dbase["t_1"]["probPedestrian"],
+    dbase["t_1"]["altruism"]
+])
+scenario = scenario.reshape(1, 5)  # Reshape per il batch
+
+print("Scenario:", scenario)
 
 while simulation_time < max_simulation_time:
 
     l = t.simulationStep()
-    step_count += 1  # Incrementa il contatore
-    simulation_time = t.simulation.getTime()  # Ottieni il tempo di simulazione corrente
+    step_count += 1
+    simulation_time = t.simulation.getTime()
     collisions = t.simulation.getCollisions()
 
     for v1 in t.vehicle.getIDList():
         for p1 in t.person.getIDList():
             print("calcolo la distanza fra ", v1, " e ", p1)
-            calculate_and_store_distance(v1, p1, step_count)  # Calcola e memorizza la distanza
+            calculate_and_store_distance(v1, p1, step_count)
 
     for collision in collisions:
         collider_id = collision.__getattr__('collider')
@@ -152,13 +191,28 @@ while simulation_time < max_simulation_time:
         for collision in collisions:
             print(collision)
 
-#Creazione grafici
+    # --- Controllo del veicolo t_1 con la rete neurale ---
+    if model is not None and "t_1" in t.vehicle.getIDList():
+        # Usa lo scenario generato all'inizio
+        prediction = model.predict(scenario)
+
+        # Interpreta la previsione e applica le azioni al veicolo
+        # ***QUESTA PARTE DEVE ESSERE ADATTATA AL TUO MODELLO***
+        # Esempio:
+        acceleration = prediction[0][0]
+        steering = prediction[0][1]
+
+        target_speed = t.vehicle.getSpeed("t_1") + acceleration * 5
+        t.vehicle.setSpeed("t_1", max(0, target_speed))
+
+        # Esempio di sterzo (molto semplificato, vedi nota precedente)
+        # t.vehicle.setAngle("t_1", steering * 10) # Non esiste setAngle. Serve changeLane o altro
+    # --- Fine controllo veicolo t_1 ---
+
+# Creazione grafici
 if distance_data_t0:
-    plot_distances(distance_data_t0, pair_names, simulation_steps, "Distanza Pedoni - Auto t_0")
+    plot_distances(distance_data_t0, pair_names, simulation_steps, "Distanza Pedoni - Auto t_0", save_path)
 if distance_data_t1:
-    plot_distances(distance_data_t1, pair_names, simulation_steps, "Distanza Pedoni - Auto t_1")
+    plot_distances(distance_data_t1, pair_names, simulation_steps, "Distanza Pedoni - Auto t_1", save_path)
 
 t.close()
-
-
-
