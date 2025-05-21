@@ -26,6 +26,7 @@ class Configuration:
 		self.HIDDEN_LAYER_MUTATION_RANGE = 0.01  # Apply Mutation of 1%
 		self.costPedestrian = 0.25	# cost of pedestrian c_s
 		self.costPassengers = 0.25 	# cost of passengers c_t
+		self.ALTRUISM = 0.1	# altruistic behavior
 		self.numberOfPedestrians=5	#numberOfPedons
 		self.numberOfPassengers=5	#numberOfPassengers
 		self.probDeathPedestrians = 1.0	#probDeathPedestrians
@@ -33,10 +34,13 @@ class Configuration:
 		self.STIGMA = -0.25
 		self.HONOR = 0.25
 		self.randomizeAltruism = False
-		self.set_path("/Users/onga/git/-25-KMEA-/Utilitarian/outputTest")
+		self.set_path("/Users/onga/git/-25-KMEA-/fixedCode/outputTest")
 		self.set_best_candidates()
 		self.set_random_candidates()
 		
+	def set_altruism(self, altruism):
+		self.ALTRUISM = altruism
+		#self.set_path()
 		
 	def set_best_candidates(self):
 		self.BEST_CANDIDATES_COUNT = max(1, int(self.POPULATION_SIZE * self.best_ratio))  # Number of Best Candidates to Use

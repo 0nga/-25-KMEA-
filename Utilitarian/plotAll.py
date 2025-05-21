@@ -9,6 +9,7 @@ import shutil  # Import the shutil module for directory deletion
 
 # Elimina la directory grafici prima della creazione dei nuovi grafici
 def setup_output_directory(script_dir):
+
     output_dir = os.path.join(script_dir, "grafici")
 
     if os.path.exists(output_dir):
@@ -18,13 +19,14 @@ def setup_output_directory(script_dir):
 
     return output_dir
 
+
 def read_parameters(path, max_gen=None):
     params = {
         'altruismLevel': -1,
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 50,  # Default value for max_gen
+        'max_gen': 5,  # Default value for max_gen
         'pop_size': 100
     }
 
@@ -139,7 +141,9 @@ def plot_accuracy(path, output_dir, params):
             y_score = l.predAction.astype(float)
 
             if len(np.unique(y_true)) > 1:
-                fpr, tpr, _ = roc_curve(y_true, y_score)
+                # Decommenta per avere le ROC-AUC di ogni gen
+
+                '''fpr, tpr, _ = roc_curve(y_true, y_score)
                 auc_score = roc_auc_score(y_true, y_score)
 
                 plt.figure(figsize=(6, 6))
@@ -151,14 +155,11 @@ def plot_accuracy(path, output_dir, params):
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(os.path.join(output_dir, f"roc_gen_{i}.png"))
-                plt.close()
-
+                plt.close()'''
         except Exception as e:
             print(f"Errore alla generazione {i}: {e}")
 
     if len(np.unique(y_true)) > 1:
-        # Decommenta per avere le ROC-AUC di ogni gen
-        '''
         ns_probs = np.random.randint(2, size=len(y_true))
         ns_fpr, ns_tpr, _ = roc_curve(y_true, ns_probs)
         lr_fpr, lr_tpr, _ = roc_curve(y_true, y_score)
@@ -172,7 +173,6 @@ def plot_accuracy(path, output_dir, params):
         plt.title(f"ROC Curve - Ultima Generazione (AUC = {roc_auc_score(y_true, y_score):.2f})")
         plt.savefig(os.path.join(output_dir, f"roc_curve_altruism_{params['altruismLevel']}.png"))
         plt.close()
-        '''
 
     accuracyList = pd.DataFrame(accuracy_data)
     accuracyList.generation = accuracyList.generation.astype('float64')
@@ -224,20 +224,6 @@ def plot_accuracy(path, output_dir, params):
 
         except Exception as e:
             print(f"Errore alla generazione {i}: {e}")
-
-    # Compute confusion matrix
-    cm = confusion_matrix(y_true, y_pred)
-
-    # Plot confusion matrix
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'])
-    plt.title(f"Confusion Matrix (Altruism Level: {params['altruismLevel']})")
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"confusion_matrix_{params['altruismLevel']}.png"))
-    plt.close()
-
 
 def plot_classification_metrics(path, output_dir, params):
     precision_list = []

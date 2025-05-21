@@ -4,7 +4,7 @@ HIDDEN_LAYER_RATE: [0.1]
 HIDDEN_LAYER_ACTIVATIONS: ['relu']
 HIDDEN_LAYER_TYPE: ['dense']
 MODEL_OPTIMIZER: ['adam', 'rmsprop']
-MAX_GENERATIONS: 100
+MAX_GENERATIONS: 500
 POPULATION_SIZE: 100
 best_ratio: 0.8
 random_ratio: 0.01
@@ -13,6 +13,7 @@ HIDDEN_LAYER_MUTATION_PROBABILITY: 0.1
 HIDDEN_LAYER_MUTATION_RANGE: 0.01
 costPedestrian: 0.25
 costPassengers: 0.25
+ALTRUISM: 0.1
 numberOfPedestrians: 5
 numberOfPassengers: 5
 probDeathPedestrians: 0.1

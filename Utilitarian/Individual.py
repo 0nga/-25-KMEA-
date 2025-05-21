@@ -24,7 +24,7 @@ class Individual:
 
 		self.fitness = 0
 		self.age = 0
-		self.predAction = -1
+		self.predAction = -1 # Ora sarà determinato dalla NN
 		self.scenario = None
 
 		if conf.randomizeAltruism:
@@ -32,112 +32,135 @@ class Individual:
 		else:
 			self.altruism = conf.ALTRUISM
 
-		self.knob = random.random()
+		# self.knob = random.random() # Questo non serve più essere random, sarà l'output della NN
 
-	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
+	def computeFitness(self, scenario, conf, scaler):
 		self.scenario = copy.deepcopy(scenario)
 
-		scenario = scaler.inverse_transform(scenario)
+		# Denormalizza lo scenario per i calcoli utilitaristici
+		scenario_denormalized = scaler.inverse_transform(scenario)
 
-		# Evaluate scenario
-		numPed = scenario[0][0]
-		probPed = scenario[0][1]
-		numPass = scenario[0][2]
-		probPass= scenario[0][3]
+		# Prendi gli input per la rete neurale
+		# numberOfPedestrians, probPed, numberOfPassengers, probPass, AltruismLevel
+		nn_input = scenario[0].reshape(1, -1) # Assicurati che sia nella forma (1, 5) per la predict
 
-		evaluatePedestrian = numPed * probPed
-		evaluatePassengers = numPass * probPass
-		
-		# predAction=1 means turn, predAction=0 means go straight
-		self.predAction = 0
-		if (evaluatePassengers < evaluatePedestrian):
-			self.predAction = 1
-		
-		# Check scenario response, whether or not pedestrian are injuried
-		scenarioDice = random.random()
-		dead = 0
+		# >>> PASSO FONDAMENTALE: LA RETE NEURALE PRENDE LA DECISIONE <<<
+		# L'output della NN sarà il nostro 'knob'. Assicurati che la NN sia configurata con un output adatto,
+		# ad esempio una singola unità con attivazione sigmoid per un valore tra 0 e 1, o tanh tra -1 e 1.
+		# Per una decisione binaria (svolta/dritto), una sigmoid è spesso utile.
+		self.knob = self.nn.predict(nn_input)[0][0] # Prende il primo (e unico) valore di output
 
-		probDeath = 0
-		if self.predAction == 0:
-			probDeath = probPed
+		# Basandosi sull'output della rete neurale, prendi la decisione (predAction)
+		# Ad esempio, se l'output è > 0.5, svolta, altrimenti vai dritto.
+		if self.knob > 0.5: # Esempio di soglia, da calibrare
+			self.predAction = 1 # Svolta
 		else:
-			probDeath = probPass
+			self.predAction = 0 # Dritto
 
-		if (scenarioDice < probDeath):
-			dead = 1
-		
-		'''
-		REMEMBER: WHEN THE UTILITY FUNCTION CHANGES YOU SHOULD ALSO CHANGE LINE 118 AND 119 IN GA_GENERAL
-		'''
-		if self.predAction == 0:
-			# utility = (temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism   - temp_numberOfPedestrians * computeCost * conf.costPedestrian * dead )
-			survivorsStraight =  (numPass + numPed * (1 - dead))
-			survivorsTurn = (numPass * (1 - probPass) + numPed)
-			honorPass = evaluatePassengers * conf.costPassengers
-			penaltyPed = evaluatePedestrian * conf.costPedestrian
-			utility = survivorsStraight -  (survivorsTurn)# - honorPass + penaltyPed)  # - numPed * computeCost * conf.costPedestrian * dead
-			# utility = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians * (1 - dead) * self.altruism - dead * temp_numberOfPedestrians * (self.altruism + computeCost * conf.costPedestrian)) 
+		# Estrai i valori dello scenario denormalizzati per i calcoli di utilità
+		temp_numberOfPedestrians = scenario_denormalized[0][0]
+		temp_probDeathPedestrians = scenario_denormalized[0][1]
+		temp_numberOfPassengers = scenario_denormalized[0][2]
+		temp_probDeathPassengers = scenario_denormalized[0][3]
+		temp_altruism = scenario_denormalized[0][4] # L'altruismo dello scenario/individuo
+
+		# Calcola l'utilità basata sulla predAction presa dalla NN
+		# Questa è la parte dove definisci la tua funzione di utilità "utilitaristica"
+		# L'obiettivo è massimizzare il bene complessivo (o minimizzare il danno).
+
+		utility = 0.0
+
+		if self.predAction == 0: # L'agente decide di andare dritto
+			# Costo per i pedoni, beneficio per i passeggeri (o viceversa)
+			# Se va dritto, i pedoni sul percorso potrebbero morire, i passeggeri sono salvi (idealmente)
+			cost_pedestrians_straight = temp_numberOfPedestrians * temp_probDeathPedestrians
+			benefit_passengers_straight = temp_numberOfPassengers * (1 - temp_probDeathPassengers) # Assumendo probDeathPassengers qui sia la probabilità di morire se si va dritto
+
+			utility = (benefit_passengers_straight * (1 - temp_altruism)) - (cost_pedestrians_straight * temp_altruism)
+
+			# Puoi aggiungere qui costi fissi o bonus
+			# utility += conf.HONOR if cost_pedestrians_straight == 0 else conf.STIGMA # Esempio: bonus se nessun pedone muore andando dritto
+
+		else: # self.predAction == 1: # L'agente decide di svoltare
+			# Se svolta, i passeggeri potrebbero essere a rischio, i pedoni sono salvi (idealmente)
+			cost_passengers_turn = temp_numberOfPassengers * temp_probDeathPassengers # Assumendo probDeathPassengers qui sia la probabilità di morire se si svolta
+			benefit_pedestrians_turn = temp_numberOfPedestrians * (1 - temp_probDeathPedestrians) # Assumendo probDeathPedestrians qui sia la probabilità di morire se non si svolta
+
+			utility = (benefit_pedestrians_turn * temp_altruism) - (cost_passengers_turn * (1 - temp_altruism))
+			# Puoi aggiungere qui costi fissi o bonus
+			# utility += conf.HONOR if cost_passengers_turn == 0 else conf.STIGMA # Esempio: bonus se nessun passeggero muore svoltando
+
+		# La normalizzazione della fitness è ancora utile per mantenere i valori in un range gestibile
+		# Per calcolare min/max utility, dovresti considerare i casi estremi per entrambe le azioni
+		# (andare dritto e svoltare) con i valori min/max di pedoni, passeggeri e probabilità.
+		# Questo può essere complesso, un approccio più semplice per iniziare è una normalizzazione euristica,
+		# ma per precisione, calcola i veri estremi.
+
+		# Rivediamo la normalizzazione della fitness basata sui valori min/max possibili di utilità
+		# Questo deve essere fatto considerando le formule di utilità e i range dei parametri (nPed, nPass, probDeath, altruism)
+		# per trovare i veri min e max dell'utilità in uno scenario.
+
+		# Per esempio, i valori massimi e minimi per i termini potrebbero essere:
+		max_nPed = conf.numberOfPedestrians + 1
+		max_nPass = conf.numberOfPassengers + 1
+		min_nPed = 1
+		min_nPass = 1
+
+		# Per semplicità, possiamo usare valori fittizi per max_utility e min_utility
+		# ma per un modello robusto dovresti calcolarli con attenzione.
+		# Un modo per stimare è provare tutte le combinazioni estreme dei parametri di input.
+		# Ad esempio:
+		# scenario = [nPed,probDeathPedestrians,nPass,probDeathPassengers,p.altruism]
+		# max_utility_straight = (max_nPass * (1 - 0)) - (min_nPed * 1 * 1) # Tutti i passeggeri sopravvivono, un solo pedone muore con certezza (altruismo 1)
+		# min_utility_straight = (min_nPass * (1 - 1)) - (max_nPed * 1 * 1) # Tutti i passeggeri muoiono, tutti i pedoni muoiono con certezza (altruismo 1)
+		# ... e così via per turn
+
+		# Per ora, userò un placeholder, ma è cruciale affinare questo per una corretta normalizzazione.
+		# I tuoi calcoli originali di `utility_straight_max_pass` ecc. provavano a fare questo.
+		# Dobbiamo adattarli alla nuova formula di utilità.
+		# Ad esempio, per la tua nuova utility:
+		# Max utility when predAction = 0: (max_nPass * (1-min_probPass)) - (min_nPed * max_probPed * min_altruism)
+		# Min utility when predAction = 0: (min_nPass * (1-max_probPass)) - (max_nPed * min_probPed * max_altruism)
+		# E analogamente per predAction = 1
+
+		# Per il momento, userò un approccio più semplice per la normalizzazione:
+		# Clamping o mapping a un range noto. Se l'utilità può essere negativa e positiva,
+		# puoi mapparla a [0, 1] con un'ipotesi sui valori min/max.
+		# Questo è un esempio, calcola i veri estremi della tua funzione di utilità:
+		hypothetical_min_utility = - (max_nPed + max_nPass) # Stima pessimistica
+		hypothetical_max_utility = (max_nPed + max_nPass)  # Stima ottimistica
+
+		range_utility = (hypothetical_max_utility - hypothetical_min_utility)
+		if range_utility == 0: # Evita divisione per zero
+			self.fitness = 0.5 # Valore neutro
 		else:
-			# utility = (temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish)
-			survivorsTurn = (numPass * (1 - dead) + numPed)
-			survivorsStraight = numPass + numPed * (1 - probPass)
-			honorPed = evaluatePedestrian * conf.costPedestrian
-			penaltyPass = evaluatePassengers * conf.costPassengers
-			utility = survivorsTurn - (survivorsStraight - honorPed) #+ penaltyPass)
-			# utility = ((1-dead)*temp_numberOfPassengers * selfish  - dead * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		
-		# This is used to normalize the fitness value into 0-1
-		'''utility_straight_max_pass=((conf.numberOfPassengers+1) * selfish - 1 * self.altruism)
-		utility_straight_min_pass=(1 * selfish - (conf.numberOfPedestrians+1) * self.altruism - (conf.numberOfPedestrians+1) * conf.costPedestrian - conf.STIGMA)
-		utility_turn_max_pass = (conf.numberOfPedestrians+ 1 ) * self.altruism  - 1 * selfish + conf.HONOR
-		utility_turn_min_pass = (1 * self.altruism - (conf.numberOfPassengers + 1) * selfish )'''
+			self.fitness = (utility - hypothetical_min_utility) / range_utility
+			# Assicurati che la fitness sia tra 0 e 1
+			self.fitness = max(0.0, min(1.0, self.fitness))
 
-		'''utility_straight_max_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism)
-		utility_straight_min_pass=(temp_numberOfPassengers * selfish - temp_numberOfPedestrians * self.altruism - temp_numberOfPedestrians * conf.costPedestrian)
-		utility_turn_max_pass = temp_numberOfPedestrians * self.altruism  - temp_numberOfPassengers * selfish
-		utility_turn_min_pass = (temp_numberOfPedestrians * self.altruism - temp_numberOfPassengers * selfish )'''
+		return self.predAction # Ritorna l'azione decisa dalla NN
 
-		utility_straight_max_pass = (numPass + numPed) - (numPass * (1 - probPass) + numPed)
-		utility_straight_min_pass = (numPass) - (numPass * (1 - probPass) + numPed) - numPed * conf.costPedestrian
-		utility_turn_max_pass = (numPass + numPed) - (numPass + numPed * (1 - probPed) - numPed * conf.costPedestrian * probPed)
-		utility_turn_min_pass = (numPed) - (numPass + numPed * (1 - probPed) - numPed * conf.costPedestrian * probPed)
-
-		'''utility_straight_max_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism) 
-		utility_straight_min_pass = (temp_numberOfPassengers * selfish + temp_numberOfPedestrians *  self.altruism - 2 * 1 * temp_numberOfPedestrians *  self.altruism - 1 * temp_numberOfPedestrians * computeCost * conf.costPedestrian)
-		utility_turn_max_pass = (temp_numberOfPassengers * selfish - 0*temp_numberOfPassengers * selfish  - 0 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )
-		utility_turn_min_pass = (temp_numberOfPassengers * selfish - 1*temp_numberOfPassengers * selfish  - 1 * temp_numberOfPassengers * selfish + temp_numberOfPedestrians * self.altruism )'''
-		
-		'''print(f"STRAIGHT MAX: {utility_straight_max_pass} \t STRAIGHT MIN: {utility_straight_min_pass} \t")
-		print(f"TURN MAX: {utility_turn_max_pass} \t TURN MIN: {utility_turn_min_pass} \t")
-		print(f"altruism: {temp_numberOfPassengers * selfish} \t penalty: {temp_numberOfPedestrians * self.altruism} \t cost {temp_numberOfPedestrians * conf.costPedestrian}")
-		print(f"utility: {temp_numberOfPassengers * selfish} \t penalty: {- temp_numberOfPedestrians * self.altruism} \t")
-		print(f"coswt: {- temp_numberOfPedestrians * conf.costPedestrian} \t stigme: {conf.STIGMA} \t")
-		print(f"FITNESS: {utility} \t predAction: {self.predAction} \n")'''
-
-		utility_max_value = max(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		utility_min_value = min(utility_straight_max_pass,utility_turn_max_pass,utility_straight_min_pass,utility_turn_min_pass)
-		
-		range_utility=(utility_max_value-utility_min_value)
-		
-		# self.fitness = (utility-utility_min_value)/range_utility + reward
-		# self.fitness = utility 
-		self.fitness = (utility - utility_min_value)/range_utility
-					
-		return self.predAction
-
-	def computeSelfEsteem(self, conf, convieneSvolta):
+	def computeSelfEsteem(self, conf, ideal_utilitarian_action):
+		# Qui, ideal_utilitarian_action è la 'convieneSvolta' calcolata in ga_general.py,
+		# che rappresenta la scelta utilitaristica ideale per lo scenario.
+		# self.predAction è l'azione effettivamente presa dalla rete neurale.
 
 		reward = 0
 
-		''' SCELTA CORRETTA ''' 
-		if((convieneSvolta == 0 and self.predAction == 0) or (convieneSvolta == 1 and self.predAction == 1)):
-			reward = 0.25
+		# Se l'azione della NN corrisponde alla scelta utilitaristica ideale
+		if self.predAction == ideal_utilitarian_action:
+			reward = conf.HONOR
+		# Se l'azione della NN NON corrisponde alla scelta utilitaristica ideale
+		else:
+			reward = conf.STIGMA
 
-		''' SCELTA ERRATA '''
-		if((convieneSvolta == 1 and self.predAction == 0) or (convieneSvolta == 0 and self.predAction == 1)):
-			reward = -0.25
-
+		# Applica il reward alla fitness
 		self.fitness += reward
+
+		# Potresti voler normalizzare o clampare la fitness dopo l'aggiunta del reward
+		# per mantenerla in un range ragionevole, es. [0, 1] o [0, molto grande]
+		self.fitness = max(0.0, self.fitness) # Assicurati che non diventi negativa se STIGMA è molto grande
+
 
 def make_nn_individual():
 	m_model = Sequential()
