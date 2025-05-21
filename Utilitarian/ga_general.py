@@ -7,7 +7,6 @@ from keras.models import Sequential,Model # Keras è usato per la NN
 from keras.layers import Dense, Dropout, InputLayer, Input
 from keras import backend as K
 from Configuration import Configuration # Importa la classe di configurazione
-import copy
 import shutil
 
 from Individual import * # Importa la classe Individual e le funzioni associate
@@ -29,19 +28,19 @@ def main():
 	# Gestione dei flag passati nel comando
 	try:
 		# Definisci gli argomenti attesi (h per help, a per altruism, ecc.)
-		opts, args = getopt.getopt(sys.argv[1:], "ha:o:g:p:e:r", 
-									["help", "altruism=", "output=", "gen=", "population=", "probped=", "randomizealtruism"])
+		opts, args = getopt.getopt(sys.argv[1:], "ha:o:g:p:e:s:r", 
+									["help", "altruism=", "output=", "gen=", "population=", "probped=", "randomizealtruism", "savePassengers="])
 	except getopt.GetoptError as err:
 		print(f"Error parsing options: {err}")
 		# Stampa un messaggio di aiuto se gli argomenti non sono validi
-		print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] [-o <outputPath>]")
+		print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] -s <savePassengers> [-o <outputPath>]")
 		sys.exit(2)
 
 	# Elabora gli argomenti passati
 	# print(f"Arguments received: {opts}") # Debug
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
-			print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> [-r] [-a <altruismLevel>] [-o <outputPath>]")
+			print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> -s <savePassengers> [-r] [-a <altruismLevel>] [-o <outputPath>]")
 			sys.exit()
 		elif opt in ("-a", "--altruism"):	
 			conf.set_altruism(float(arg))
@@ -58,9 +57,13 @@ def main():
 		elif opt in ("-e", "--probped"): # Probabilità di morte dei pedoni (se non randomizzata per scenario)
 			conf.probDeathPedestrians = float(arg)
 			print(f"Configuration: Default probDeathPedestrians set to {conf.probDeathPedestrians}")
+		elif opt in ("-s", "--savePassengers"): # Flag per decidere l'approccio deontologico	
+			conf.savePassengers = int(arg)
+			print(f"Configuration: savePassengers set to {conf.savePassengers}")
 		elif opt in ("-r", "--randomizealtruism"): # Flag per randomizzare l'altruismo degli individui	
 			conf.randomizeAltruism = True
 			print(f"Configuration: Individual altruism will be randomized.")
+
 		
 	# Salvataggio delle opzioni di configurazione correnti
 	save_options(conf) # Funzione definita in Individual.py
@@ -78,7 +81,6 @@ def main():
 	except OSError as e:
 		print(f"Error cleaning/creating output directory {pathLog}: {e}")
 		sys.exit(1) # Exit if there's an issue with the output directory
-
 
 	# Genera la prima popolazione di individui casualmente
 	population_new = generate_first_population_randomly(conf) # Funzione da Individual.py
@@ -125,7 +127,7 @@ def main():
 				# Lo scaler è passato per permettere la denormalizzazione all'interno di computeFitness.
 				action = individual_p.computeFitness(current_scenario_std_for_individual, conf, scaler)
 				
-				predAction_list_current_gen.append(action) # Sarà sempre 0
+				predAction_list_current_gen.append(action) # Sarà sempre 0 o sempre 1
 				fitness_list_current_gen.append(individual_p.fitness)
 				knob_list_current_gen.append(individual_p.knob) # Output grezzo della NN
 			else:
@@ -143,11 +145,10 @@ def main():
 		# si confronta con l'azione "media" della comunità (derivata da gen_avg_knob_score).
 		
 		#for individual_p in population:
-		#	individual_p.computeSelfEsteem(conf, gen_avg_knob_score) 
+		#	individual_p.computeSelfEsteem(conf, int(conviene_svolta_utilitarian_bool)) 
 		
 		# Aggiorna la lista delle fitness dopo il calcolo del self-esteem
 		fitness_list_current_gen = [p.fitness for p in population]
-
 
 		# >>>>>> Registrazione dei dati per la generazione corrente <<<<<<
 		# Costruisci il DataFrame df_results_current_gen riga per riga
@@ -190,6 +191,8 @@ def main():
 							  (s_numPed * computeCostForSvoltaFlag * conf.costPedestrian) # L'originale non aveva s_probPed qui
 
 				conviene_svolta_utilitarian_bool = (util_svolta > util_dritto)
+				
+				individual_p.computeSelfEsteem(conf, int(conviene_svolta_utilitarian_bool)) 
 
 				# Prepara la riga di dati da aggiungere al DataFrame
 				row_data_dict = {
@@ -207,12 +210,10 @@ def main():
 			else:
 				print(f"Warning: Mismatch in data for individual {i} during logging.")
 
-
 		df_results_current_gen = pd.DataFrame(temp_rows_for_df)
 		# Opzionale: accumulare i risultati di tutte le generazioni
 		# if not df_results_current_gen.empty:
 		# 	all_generations_results_df = pd.concat([all_generations_results_df, df_results_current_gen], ignore_index=True)
-
 
 		# Calcola le metriche della generazione
 		gen_avg_fitness_score = np.average(fitness_list_current_gen) if fitness_list_current_gen else 0.0

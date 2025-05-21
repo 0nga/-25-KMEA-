@@ -1,6 +1,9 @@
 <configuration>
     <input>
         <net-file value="trolleyNet.net.xml"/>
-        <route-files value="trolleyNet.rou.xml"/>
+        <route-files value="trolleyNetCar.rou.xml,trolleyNetPed.rou.xml"/>
     </input>
+    <time>
+        <begin value="0"/>
+        <end value="3600"/> </time>
 </configuration>

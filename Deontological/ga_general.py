@@ -8,6 +8,8 @@ from keras.layers import Dense, Dropout, InputLayer, Input
 from keras import backend as K
 from Configuration import Configuration # Importa la classe di configurazione
 import copy
+import shutil
+
 
 from Individual import * # Importa la classe Individual e le funzioni associate
 

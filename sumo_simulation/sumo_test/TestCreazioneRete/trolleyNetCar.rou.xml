@@ -11,6 +11,7 @@
     </trip> 
     <trip id="t_1" depart="11.00" departLane="2" personNumber="5" from="E0" to="E4" via="E3"/>-->
     <trip id="t_0" depart="0.00" color="yellow" departLane="2" personNumber="5" from="E0" to="E4" via="E3"/>
+    
     <trip id="t_1" depart="0.00" color="red" from="E3" to="E3">
         <stop lane="E3_1" startPos="27.79" endPos="38.00" duration="1000.00"/>
     </trip> 
