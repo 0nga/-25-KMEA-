@@ -89,7 +89,7 @@ def plot_distances(distance_data, pair_names, simulation_steps, title, save_dir=
             first_label_added = False
             for idx in close_indices:
                 if not first_label_added:
-                    plt.plot(x_values[idx], distances_extended[idx], 's', color='red', markersize=6, label=f"Distanza < 10m per {person_name}")
+                    plt.plot(x_values[idx], distances_extended[idx], 's', color='red', markersize=6)
                     first_label_added = True
                 else:
                     plt.plot(x_values[idx], distances_extended[idx], 's', color='red', markersize=6)
@@ -174,7 +174,7 @@ def defineScenario(dbase, vehicleID):
     return dbase[vehicleID]['nPedestrian']
 
 
-def calculate_and_store_distance(vehicle_id, person_id, step):
+def calculate_and_store_distance2(vehicle_id, person_id, step):
     """
     Calcola la distanza tra un veicolo e un pedone, la memorizza
     e memorizza un flag se la distanza è inferiore a 10 metri.
@@ -212,6 +212,51 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
         pass # Ignora errori se veicolo/pedone non è più presente
 
 
+def calculate_and_store_distance(vehicle_id, person_id, step):
+    """
+    Calcola la distanza tra un veicolo e un pedone, la memorizza
+    e memorizza un flag se la distanza è inferiore a 10 metri.
+    Gestisce valori di distanza estremamente grandi impostandoli a 0.
+    """
+    global distance_data_t0, distance_data_t1, pair_names, simulation_steps_unique
+
+    try:
+        posV = traci.vehicle.getPosition(vehicle_id)
+        posP = traci.person.getPosition(person_id)
+        distance = traci.simulation.getDistance2D(posV[0], posV[1], posP[0], posP[1], isDriving=True)
+
+        # Controlla se la distanza è un valore estremamente grande (simile a infinito)
+        # o se è maggiore di una soglia ragionevole (es. 1000000000000.0)
+        # Se lo è, impostala a 0 come richiesto.
+        if distance > 1e15 or np.isinf(distance): # Using 1e15 as a very large number threshold
+            distance = 0.0 # Set to 0 if the distance is extremely large or infinite
+
+        is_close = distance < 10.0 # Flag per distanza inferiore a 10 metri
+
+        pair_key = f"{vehicle_id}-{person_id}"
+        if pair_key not in pair_names:
+            pair_names[pair_key] = (vehicle_id, person_id)
+
+        if vehicle_id == "t_0":
+            if pair_key not in distance_data_t0:
+                distance_data_t0[pair_key] = []
+            distance_data_t0[pair_key].append((distance, is_close))
+            # DEBUG: Stampa quando un dato di distanza per t_0 viene aggiunto
+            print(f"DEBUG: Distanza per t_0 e {person_id} al passo {step}: {distance:.2f}m (Vicino: {is_close})")
+        elif vehicle_id == "t_1":
+            if pair_key not in distance_data_t1:
+                distance_data_t1[pair_key] = []
+            distance_data_t1[pair_key].append((distance, is_close))
+
+        # Aggiungi il passo di simulazione solo se non è già presente
+        if step not in simulation_steps_unique:
+            simulation_steps_unique.append(step)
+            simulation_steps_unique.sort() # Mantiene i passi ordinati
+
+    except traci.exceptions.TraCIException as e:
+        # print(f"Errore TraCI durante il calcolo della distanza: {e}") # Debugging
+        pass # Ignora errori se veicolo/pedone non è più presente
+    
 def modify_pedestrian_routes(route_file, num_pedestrians):
     """Modifica il file di route dei pedoni in base al numero specificato."""
     try:
