@@ -1,21 +1,11 @@
-Per aumentare la dimensione del pedone aggiungi vtypes nel file.net
+Per aumentare la velocità e dimensione dei pedoni aggiungi nel file .rou
 
-<?xml version="1.0" encoding="UTF-8"?>
-<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" avoidOverlap="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+    <vType id="fast_pedestrian" vClass="pedestrian" length="1.0" width="1.0" speedFactor="1.0" minGap="0.5" maxSpeed="3.00" />
 
-    <location netOffset="0.00,0.00" convBoundary="-61.29,-26.41,66.12,33.36" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,1000000000.00" projParameter="!"/>
+minGap è la distanza minima di un veicolo (anche pedone) da quello che lo precede
 
-    <vTypes>
-        <vType id="DEFAULT_PEDTYPE" vClass="pedestrian" length="1.0" width="1.0"/>
-    </vTypes>
+Poi definisci così il pedone
 
-    <edges>
-        </edges>
-
-Per aumentare la velocità dei pedoni aggiungi nel file .rou
-
-<vType id="fast_pedestrian" vClass="pedestrian" speedFactor="2.1"/>
- 
 <person id="p_0" depart="0.00" type="fast_pedestrian">
         <personTrip from="-E4" to="E6"/>
 </person>
