@@ -196,7 +196,7 @@ def calculate_and_store_distance2(vehicle_id, person_id, step):
                 distance_data_t0[pair_key] = []
             distance_data_t0[pair_key].append((distance, is_close))
             # DEBUG: Stampa quando un dato di distanza per t_0 viene aggiunto
-            print(f"DEBUG: Distanza per t_0 e {person_id} al passo {step}: {distance:.2f}m (Vicino: {is_close})")
+            #print(f"DEBUG: Distanza per t_0 e {person_id} al passo {step}: {distance:.2f}m (Vicino: {is_close})")
         elif vehicle_id == "t_1":
             if pair_key not in distance_data_t1:
                 distance_data_t1[pair_key] = []
@@ -242,7 +242,7 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
                 distance_data_t0[pair_key] = []
             distance_data_t0[pair_key].append((distance, is_close))
             # DEBUG: Stampa quando un dato di distanza per t_0 viene aggiunto
-            print(f"DEBUG: Distanza per t_0 e {person_id} al passo {step}: {distance:.2f}m (Vicino: {is_close})")
+            # print(f"DEBUG: Distanza per t_0 e {person_id} al passo {step}: {distance:.2f}m (Vicino: {is_close})")
         elif vehicle_id == "t_1":
             if pair_key not in distance_data_t1:
                 distance_data_t1[pair_key] = []
@@ -329,6 +329,8 @@ scenario = scenario.reshape(1, 5)
 print("Scenario:", scenario)
 # --- Fine generazione scenario ---
 
+# Variabili per calcolo probabilità di morte dei passeggeri/pedoni
+probDeath = scenario[0][3] # di default lascio quella dei pedoni (auto dritta - scelta = 0)
 
 # Inizializza SUMO con traci.start (sempre in modalità automatica)
 sumo_cfg_file = os.path.join(script_dir, "TestCreazioneRete", "trolleyNet.sumocfg")
@@ -388,7 +390,11 @@ try:
         if model is not None and "t_0" in traci.vehicle.getIDList():
             prediction = model.predict(scenario, verbose=0)
 
-            if prediction[0][0] > 0.5:
+            if abs(prediction[0][0]) > 0.5: # scelta = 1 => l'auto deve svoltare
+
+                # setto come prob morte quella dei passeggeri
+                probDeath = scenario[0][1]                     
+
                 try:
                     current_lane_index = traci.vehicle.getLaneIndex("t_0")
                     current_edge_id = traci.vehicle.getRoadID("t_0")
@@ -400,6 +406,26 @@ try:
                             traci.vehicle.changeLane("t_0", current_lane_index + 1, 0.5)
                 except traci.exceptions.TraCIException as e:
                     pass # Ignora errori se la corsia non è valida o il veicolo non è più lì
+            else:
+                # setto come prob morte quella dei pedoni
+                probDeath = scenario[0][3]
+
+    scenarioDice = random.random()
+    print("Dice = ", scenarioDice, "probDeath = ", probDeath, "Prediction: ", round(abs(prediction[0][0])))
+
+    # Qua si entra se la prediction è = 1
+    if (probDeath == scenario[0][1]):
+        if(scenarioDice < probDeath):
+            print(" PASSEGGERI MORTI ")
+        else:
+            print(" PASSEGGERI SALVI ")
+
+    # Qua si entra se la prediction è = 0
+    if (probDeath == scenario[0][3]):
+        if(scenarioDice < probDeath):
+            print(" PEDONI MORTI ")
+        else:
+            print(" PEDONI SALVI ")
 
     print(f"Simulazione terminata dopo {step_count} passi o {simulation_time:.2f} secondi.")
 

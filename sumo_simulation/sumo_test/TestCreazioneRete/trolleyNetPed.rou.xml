@@ -13,7 +13,4 @@
     <person id="p_3" depart="0.00" type="fast_pedestrian">
         <personTrip from="-E4" to="E6" />
     </person>
-    <person id="p_4" depart="0.00" type="fast_pedestrian">
-        <personTrip from="-E4" to="E6" />
-    </person>
 </routes>
