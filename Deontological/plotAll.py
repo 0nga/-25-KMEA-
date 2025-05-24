@@ -24,7 +24,7 @@ def read_parameters(path, max_gen=None):
         'probPed': -1,
         'probPass': -1,
         'costPed': -1,
-        'max_gen': 50,  # Default value for max_gen
+        'max_gen': 500,  # Default value for max_gen
         'pop_size': 100
     }
 
@@ -308,7 +308,7 @@ def plot_confusion_matrix_last_generation(path, output_dir, params):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-g", "--generations", type=int, default=50, help="Number of generations to read")  # Modifica qui
+    parser.add_argument("-g", "--generations", type=int, default=500, help="Number of generations to read")  # Modifica qui
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))

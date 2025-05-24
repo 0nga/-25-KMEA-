@@ -7,9 +7,7 @@ from keras.models import Sequential,Model # Keras è usato per la NN
 from keras.layers import Dense, Dropout, InputLayer, Input
 from keras import backend as K
 from Configuration import Configuration # Importa la classe di configurazione
-import copy
 import shutil
-
 
 from Individual import * # Importa la classe Individual e le funzioni associate
 
@@ -146,12 +144,11 @@ def main():
 		# Questo passo aggiorna la fitness di ogni individuo basandosi su come la sua azione
 		# si confronta con l'azione "media" della comunità (derivata da gen_avg_knob_score).
 		
-		#for individual_p in population:
-		#	individual_p.computeSelfEsteem(conf, gen_avg_knob_score) 
+		for individual_p in population:
+			individual_p.computeSelfEsteem(conf) 
 		
 		# Aggiorna la lista delle fitness dopo il calcolo del self-esteem
 		fitness_list_current_gen = [p.fitness for p in population]
-
 
 		# >>>>>> Registrazione dei dati per la generazione corrente <<<<<<
 		# Costruisci il DataFrame df_results_current_gen riga per riga
@@ -234,74 +231,6 @@ def main():
 			population_new = evolve_population(population, conf) # Funzione da Individual.py
 		else:
 			population_new = [] # Popolazione vuota se la dimensione della popolazione è 0 o la popolazione corrente è vuota
-
-
-	# >>>>>> Calcolo Accuratezza Finale (sui dati dell'ultima generazione) <<<<<<
-	print("\n********** Final Accuracy Calculation (based on last generation data) **********")
-	
-	# Usa i dati dell'ultima generazione (df_results_current_gen) per il calcolo dell'accuratezza.
-	# Se df_results_current_gen è vuota (es. 0 generazioni), non fare nulla.
-	if df_results_current_gen.empty:
-		print("No data from the last generation to calculate accuracy.")
-		if __name__ == "__main__": # Solo se eseguito come script principale
-			simulation_end_time = time.time()
-			print(f"\nTotal simulation time: {simulation_end_time - simulation_start_time:.2f} sec")
-		return # Esce dalla funzione main se non ci sono dati
-
-	# DataFrame per le statistiche di accuratezza aggregate
-	df_accuracy_summary = pd.DataFrame(columns=['population_type','fp','fn','tp','tn']) 
-	# DataFrame per le predizioni dettagliate (true_y vs pred_y)
-	df_accuracy_detailed_predictions_rows = [] 
-
-	# L'azione dell'agente deontologico è sempre "non svoltare" (cioè, predAction = 0).
-	# Convertiamo in numerico per il confronto (0 per dritto/non svolta, 1 per svolta).
-	agent_deontological_action_numeric = pd.Series([0] * len(df_results_current_gen)) # Sempre 0 (dritto)
-
-	# 'convieneSvolta' dall'ultima generazione (già 0 o 1, rappresenta la scelta utilitaristica)
-	utilitarian_ideal_choice_numeric = df_results_current_gen['convieneSvolta'].astype(int)
-
-	# Calcolo di True Positives (TP), True Negatives (TN), False Positives (FP), False Negatives (FN)
-	# per l'intera popolazione dell'ultima generazione, confrontando l'azione fissa dell'agente
-	# con la scelta utilitaristica ideale per ogni scenario affrontato.
-
-	# Azione agente = 0 (Dritto); Azione ideale = 1 (Svolta) -> False Negative (FN)
-	fn_count = sum((agent_deontological_action_numeric == 0) & (utilitarian_ideal_choice_numeric == 1))
-	
-	# Azione agente = 0 (Dritto); Azione ideale = 0 (Dritto) -> True Negative (TN)
-	tn_count = sum((agent_deontological_action_numeric == 0) & (utilitarian_ideal_choice_numeric == 0))
-
-	# Dato che l'agente deontologico va SEMPRE dritto (azione = 0):
-	# TP (agente svolta=1, ideale svolta=1) sarà sempre 0.
-	tp_count = 0 
-	# FP (agente svolta=1, ideale dritto=0) sarà sempre 0.
-	fp_count = 0
-	
-	# Riga per il sommario dell'accuratezza della popolazione deontologica
-	accuracy_summary_row = {
-		'population_type': "deontological_fixed_action", 
-		'fp': fp_count, 
-		'fn': fn_count, 
-		'tp': tp_count, 
-		'tn': tn_count
-	}
-	df_accuracy_summary = pd.DataFrame([accuracy_summary_row])
-
-	# Popola i dati per il DataFrame dettagliato delle predizioni
-	true_y_list = utilitarian_ideal_choice_numeric.values.tolist()
-	pred_y_list = agent_deontological_action_numeric.values.tolist() # L'azione dell'agente
-		
-	for true_value, pred_value in zip(true_y_list, pred_y_list):
-		df_accuracy_detailed_predictions_rows.append({'true_y': true_value, 'pred_y': pred_value})
-	
-	df_accuracy_detailed_predictions = pd.DataFrame(df_accuracy_detailed_predictions_rows)
-		
-	# Salva i file di accuratezza
-	if not df_accuracy_summary.empty:
-		save_accuracy(df_accuracy_summary, conf, file_name=f"accuracy_summary_gen{conf.MAX_GENERATIONS-1}.txt")
-	if not df_accuracy_detailed_predictions.empty:
-		save_accuracy(df_accuracy_detailed_predictions, conf, file_name=f"accuracy_detailed_predictions_gen{conf.MAX_GENERATIONS-1}.txt")
-	
-	print("Accuracy calculation completed and results saved.")
 
 	
 if __name__ == "__main__":

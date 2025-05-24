@@ -27,7 +27,6 @@ class Individual:
 		self.predAction = -1 # Azione predetta (-1: non ancora calcolata, 0: dritto, 1: svolta)
 		self.scenario = None # Scenario corrente affrontato dall'individuo
 
-
 		if conf.randomizeAltruism:
 			self.altruism = random.random()
 		else:
@@ -35,93 +34,56 @@ class Individual:
 				
 		self.knob = random.random()
 
-	def computeFitness(self, scenario, conf, scaler, avgKnobLevel=0):
+	def computeFitness(self, scenario, conf, scaler):
 		"""
 		Calcola la fitness dell'individuo basata sullo scenario corrente.
 		L'auto andrà SEMPRE DRITTA o SVOLTERÀ SEMPRE (approccio deontologico).
 		"""
 		
 		# --- DEONTOLOGICAL APPROACH ---
-		# L'auto va sempre dritta, indipendentemente dall'output della NN (knob).
+		# L'auto viene addestrata per andare sempre dritta o svoltare sempre
 		# predAction = 0 significa andare dritto e salvare i passeggeri
 		# predAction = 1 significherebbe svoltare e salvare i pedoni
-		if conf.savePassengers == 1:
-			self.predAction = 0  # Andare dritto
-		elif conf.savePassengers == 0:
-			self.predAction = 1  # Svoltare
-		else:
-			# Gestisci il caso in cui conf.savePassengers non è né 0 né 1 (opzionale)
-			self.predAction = 0  # Valore di default (ad esempio, dritto)
-			print(f"Warning: savePassengers has unexpected value: {conf.savePassenger}")
 
+		nn_input = scenario[0].reshape(1, -1)
+
+		self.predAction = 0
+
+		if self.nn.predict(nn_input)[0][0] > 0.5: 
+			self.predAction = 1
+		else:
+			self.predAction = 0
+		
 		#print("SAVE PASSENGERS:", str(conf.savePassengers))
 		#print("Predicted Action:", str(self.predAction))
 		return self.predAction # Ritorna l'azione (sempre 0 o sempre 1)
 
 
-	# NON USATA: non c'è una funzione fitness
-	def computeSelfEsteem(self, conf, avgKnobLevel):
+	def computeSelfEsteem(self, conf):
 		"""
-		Aggiorna la fitness dell'individuo basandosi su onore e stigma.
-		Questo dipende da come l'azione dell'individuo (sempre dritto) si confronta
-		con l'azione media della "comunità" (basata su avgKnobLevel).
+		Aggiorna la fitness dell'individuo basandosi sui reward
+		Questo dipende da come l'azione dell'individuo si confronta
+		con la regola imposta (sempre dritto o svolta sempre)
 		"""
-		# Per calcolare avgAction, servono i valori denormalizzati dello scenario corrente dell'individuo.
-		# self.scenario è standardizzato. Dobbiamo denormalizzarlo o passare lo scaler.
-		# Assumiamo che lo scaler sia disponibile tramite conf o passato come argomento se necessario.
-		# Per ora, la logica di avgAction è semplificata e potrebbe non essere accurata
-		# senza i valori denormalizzati corretti.
-		
-		# Denormalizza lo scenario per calcolare avgAction in modo più accurato
-		# Questo richiede che lo scaler sia accessibile qui. Se non lo è, questa parte
-		# potrebbe non funzionare come previsto. Per ora, assumiamo che self.scenario sia
-		# quello standardizzato e che lo scaler non sia direttamente disponibile qui.
-		# Questa è una semplificazione e potrebbe necessitare di aggiustamenti.
-		
-		# Valori denormalizzati (ipotetici, dato che lo scaler non è passato qui)
-		# num_ped_denorm = self.scenario[0][0] # Esempio, ma self.scenario è standardizzato
-		# prob_ped_denorm = self.scenario[0][1]
-		# num_pass_denorm = self.scenario[0][2]
-		# prob_pass_denorm = self.scenario[0][3]
 
-		# evaluatePedestrian_denorm = num_ped_denorm * prob_ped_denorm
-		# evaluatePassengers_denorm = num_pass_denorm * prob_pass_denorm
-		
-		avgAction = 0 # Azione media della comunità (0: dritto, 1: svolta)
-		# La logica originale per avgAction:
-		# if(avgKnobLevel * evaluatePassengers_denorm < evaluatePedestrian_denorm * (1-avgKnobLevel)):
-		#	avgAction = 1
-		# Poiché non abbiamo i valori denormalizzati facilmente qui, questa parte è problematica.
-		# Per ora, la logica di reward/stigma procederà, ma avgAction potrebbe non essere calcolata correttamente.
-		# Una soluzione sarebbe passare lo scaler a computeSelfEsteem o lo scenario denormalizzato.
+		reward = 0 # Ricompensa o penalità
+	
+		# Devo salvare i pedoni --> predAction = 1
+		if (conf.savePassengers == 0):
+			if (self.predAction == 1):
+				reward = 0.25
+			else:
+				reward = -0.25
 
-		# --- Semplificazione per avgAction ---
-		# Se non possiamo calcolare avgAction accuratamente, l'impatto di Stigma/Honor sarà limitato.
-		# Per procedere, potremmo assumere un avgAction o basarlo solo su avgKnobLevel in modo più diretto.
-		# Ad esempio, se avgKnobLevel > 0.5, la comunità tende a svoltare (avgAction = 1).
-		if avgKnobLevel > 0.5: # Semplificazione: se il knob medio è alto, la comunità "svolta"
-			avgAction = 1
-		else:
-			avgAction = 0
-		# --- Fine Semplificazione ---
+		# Devo salvare i passeggeri --> predAction = 0
+		if (conf.savePassengers == 1):
+			if (self.predAction == 0):
+				reward = 0.25
+			else:
+				reward = -0.25
 
-		reward = 0 # Ricompensa o penalità sociale
-			
-		# L'individuo va sempre dritto (self.predAction == 0)
-		# Se la comunità in media svolta (avgAction == 1) e l'individuo va dritto (self.predAction == 0),
-		# l'individuo riceve uno "stigma" per non essersi conformato all'azione altruistica (ipotetica) della comunità.
-		if avgAction == 1 and self.predAction == 0:
-			reward = conf.STIGMA 
-
-		# Se la comunità in media va dritto (avgAction == 0) e l'individuo va dritto (self.predAction == 0),
-		# non c'è né stigma né onore speciale (o un piccolo premio per conformità, a seconda delle regole).
-		# Lasciamo reward = 0 in questo caso.
-
-		# Il caso in cui l'individuo svolta (self.predAction == 1) non accade, quindi conf.HONOR non viene applicato
-		# per aver scelto un'azione altruistica quando la comunità è egoista.
-		
 		self.fitness += reward
-		# Assicura che la fitness rimanga nel range [0,1] anche dopo stigma/onore
+		# Assicura che la fitness rimanga nel range [0,1] anche dopo i reward
 		self.fitness = max(0, min(1, self.fitness))
 
 

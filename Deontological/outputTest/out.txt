@@ -7,7 +7,7 @@ HIDDEN_LAYER_ACTIVATIONS: ['relu']
 HIDDEN_LAYER_TYPE: ['dense']
 MODEL_OPTIMIZER: ['adam', 'rmsprop']
 savePassengers: 1
-MAX_GENERATIONS: 1000
+MAX_GENERATIONS: 500
 POPULATION_SIZE: 100
 best_ratio: 0.8
 random_ratio: 0.01
