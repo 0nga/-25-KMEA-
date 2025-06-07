@@ -9,7 +9,6 @@ from keras import backend as K
 from Configuration import Configuration # Importa la classe di configurazione
 import shutil
 
-
 from Individual import * # Importa la classe Individual e le funzioni associate
 
 import sys, getopt # Per gestire gli argomenti da riga di comando
@@ -24,7 +23,7 @@ def main():
 	"""
 
 	# Crea l'oggetto che conterrà la configurazione
-	conf = Configuration() #cite: 1
+	conf = Configuration()
 
 	# Gestione dei flag passati nel comando
 	try:
@@ -38,7 +37,6 @@ def main():
 		sys.exit(2)
 
 	# Elabora gli argomenti passati
-	# print(f"Arguments received: {opts}") # Debug
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
 			print("Usage: ga_general.py -g <numGenerations> -p <numPopulation> -e <probDeathPedestrians> -s <savePassengers> [-r] [-a <altruismLevel>] [-o <outputPath>]")
@@ -50,7 +48,7 @@ def main():
 			conf.MAX_GENERATIONS = int(arg)
 			print(f"Configuration: MAX_GENERATIONS set to {conf.MAX_GENERATIONS}")
 		elif opt in ("-p", "--population"):
-			conf.set_population_size(int(arg)) # Questo metodo dovrebbe aggiornare anche BEST_CANDIDATES_COUNT ecc.
+			conf.set_population_size(int(arg))
 			print(f"Configuration: POPULATION_SIZE set to {conf.POPULATION_SIZE}")
 		elif opt in ("-o", "--output"):	
 			conf.set_path(arg) # Questo metodo imposta il percorso di output
@@ -67,7 +65,7 @@ def main():
 
 		
 	# Salvataggio delle opzioni di configurazione correnti
-	save_options(conf) # Funzione definita in Individual.py
+	save_options(conf) # Funzione da Individual.py
 		
 	# >>>>>> Inizio Algoritmo Genetico <<<<<<
 	print("\n********** Genetic Algorithm Starting **********")
@@ -101,11 +99,10 @@ def main():
 		
 		# Crea gli scenari per la popolazione corrente
 		# La funzione createScenarios (da Individual.py) genera un DataFrame di scenari
-		df_scenari_input_for_nn = createScenarios(conf, population, conf.randomizeAltruism) #cite: 2
+		df_scenari_input_for_nn = createScenarios(conf, population, conf.randomizeAltruism)
 
 		# Standardizza gli scenari di input per la rete neurale
 		# Lo scaler viene fittato sui dati della generazione corrente.
-		# È importante che la standardizzazione sia consistente se si confrontano knob/fitness tra generazioni.
 		scenari_standardized_np, scaler = standardize(df_scenari_input_for_nn.copy()) # standardize da Individual.py
 
 		# >>>>>> Fase di Valutazione della Popolazione <<<<<<
@@ -115,16 +112,15 @@ def main():
 		# Liste per raccogliere i dati dalla valutazione
 		predAction_list_current_gen = []
 		fitness_list_current_gen = []
-		knob_list_current_gen = [] # Aggiunto per salvare l'output della NN
+		knob_list_current_gen = [] # Conterrà l'output della NN
 
 		# Valuta ogni individuo nella popolazione
 		for i, individual_p in enumerate(population):
-			# Prendi lo scenario standardizzato per l'individuo corrente
-			# Assicurati che l'indicizzazione sia corretta
+			# Prendi lo scenario standardizzato per l'individuo corrente ed assicurati che l'indicizzazione sia corretta
 			if scenari_standardized_np.shape[0] > i:
 				current_scenario_std_for_individual = np.array(scenari_standardized_np[i]).reshape((1,5))
 				
-				# Calcola fitness e azione predetta (ora l'azione è decisa dalla NN dell'individuo)
+				# Calcola fitness e azione predetta (azione decisa dalla NN dell'individuo)
 				action = individual_p.computeFitness(current_scenario_std_for_individual, conf, scaler)
 				
 				predAction_list_current_gen.append(action)
@@ -132,7 +128,6 @@ def main():
 				knob_list_current_gen.append(individual_p.knob) # Salva l'output grezzo della NN
 			else:
 				print(f"Warning: Mismatch between population size and number of standardized scenarios at index {i}")
-
 
 		evaluation_end_time = time.time()
 		print(f"Done > Evaluation took {evaluation_end_time - evaluation_start_time:.2f} sec")

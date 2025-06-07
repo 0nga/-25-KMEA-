@@ -26,13 +26,11 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("please declare environment variable 'SUMO_HOME'")
 
-
 def removeID(lista, x):
     """Removes element x from the list if present and not 0."""
     if (x != 0) and (x in lista):
         lista.remove(x)
     return lista
-
 
 def plot_distances(distance_data, pair_names, simulation_steps, title, save_dir="grafici"):
     """
@@ -106,7 +104,6 @@ def plot_distances(distance_data, pair_names, simulation_steps, title, save_dir=
     plt.close()
     print(f"Plot saved in: {filepath}")
 
-
 def plot_lane_occupancy(lane_data, simulation_steps, title, save_dir="grafici"):
     """
     Generates a plot of lane occupancy for vehicle t_0 at each simulation step
@@ -160,7 +157,6 @@ def plot_lane_occupancy(lane_data, simulation_steps, title, save_dir="grafici"):
     plt.close()
     print(f"Plot saved in: {filepath}")
 
-
 def defineScenario(dbase, vehicleID):
     """Defines the parameters of a scenario for a given vehicle."""
     dbase[vehicleID] = {'nPassenger': random.randint(0, 5),
@@ -169,8 +165,7 @@ def defineScenario(dbase, vehicleID):
                         'probPedestrian': random.uniform(0, 1),
                         'altruism': random.uniform(0, 1),
                         }
-    return dbase[vehicleID]['nPedestrian']
-
+    return dbase[vehicleID]
 
 def calculate_and_store_distance(vehicle_id, person_id, step):
     """
@@ -201,8 +196,6 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
             if pair_key not in distance_data_t0:
                 distance_data_t0[pair_key] = []
             distance_data_t0[pair_key].append((distance, is_close))
-            # DEBUG: Print when a distance data point for t_0 is added
-            # print(f"DEBUG: Distance for t_0 and {person_id} at step {step}: {distance:.2f}m (Close: {is_close})")
         elif vehicle_id == "t_1":
             if pair_key not in distance_data_t1:
                 distance_data_t1[pair_key] = []
@@ -214,7 +207,6 @@ def calculate_and_store_distance(vehicle_id, person_id, step):
             simulation_steps_unique.sort() # Keeps steps sorted
 
     except traci.exceptions.TraCIException as e:
-        # print(f"TraCI error during distance calculation: {e}") # Debugging
         pass # Ignore errors if vehicle/pedestrian is no longer present
     
 def modify_pedestrian_routes(route_file, num_pedestrians):
@@ -229,8 +221,19 @@ def modify_pedestrian_routes(route_file, num_pedestrians):
 
         # Add new pedestrians
         for i in range(num_pedestrians):
-            person = ET.SubElement(root, "person", id=f"p_{i}", depart="0.00", type="fast_pedestrian")
-            person_trip = ET.SubElement(person, "personTrip", attrib={"from": "-E4", "to": "E6"}) # Changed 'from' and 'to' based on trolleyNet.net.xml
+
+            person_attrib = {
+                "id": f"p_{i}",
+                "depart": "0.00",
+                "type": "fast_pedestrian",
+                "jmIgnoreFoeProb": "1.0",  # flags to ignore rules on crossing
+                "jmIgnoreFoeSpeed": "1.0",  
+                "jmIgnoreJunctionFoeProb": "1.0",
+                "jmCrossingGap": "0.0" 
+            }
+            person = ET.SubElement(root, "person", attrib=person_attrib)
+            person_trip = ET.SubElement(person, "personTrip", attrib={"from": "-E4", "to": "E6"})
+
 
         ET.indent(tree, space="    ", level=0) # Format XML for readability
         tree.write(route_file, encoding="UTF-8", xml_declaration=True)
@@ -241,6 +244,59 @@ def modify_pedestrian_routes(route_file, num_pedestrians):
         sys.exit(1)
     except ET.ParseError as e:
         print(f"Error parsing XML file '{route_file}': {e}")
+        sys.exit(1)
+
+import xml.etree.ElementTree as ET
+import sys
+
+def modify_vehicle_route_based_on_prediction(route_file_path, prediction_value):
+    """
+    Modifies the 'arrivalLane' attribute of vehicle 't_0' in the trip element
+    of the route file based on the prediction value.
+
+    Args:
+        route_file_path (str): The path to the .rou.xml file.
+        prediction_value (float): The prediction value (0 or 1, or between 0 and 1).
+    """
+    try:
+        tree = ET.parse(route_file_path)
+        root = tree.getroot()
+
+        t0_trip = None
+        for trip in root.findall('trip'):
+            if trip.get('id') == 't_0':
+                t0_trip = trip
+                break
+        
+        if t0_trip is None:
+            print(f"Error: Vehicle 't_0' trip not found in '{route_file_path}'.")
+            return
+
+        target_lane = None
+        # Determine the target lane based on the prediction value
+        if abs(prediction_value) <= 0.5: # Prediction is closer to 0
+            target_lane = "2"
+            print(f"DEBUG: Prediction is {prediction_value:.2f} (closer to 0). Setting t_0 arrivalLane to '{target_lane}'.")
+        else: # Prediction is closer to 1
+            target_lane = "1"
+            print(f"DEBUG: Prediction is {prediction_value:.2f} (closer to 1). Setting t_0 arrivalLane to '{target_lane}'.")
+
+        # Set the 'arrivalLane' attribute directly on the <trip> element
+        t0_trip.set('arrivalLane', target_lane)
+        
+        # Format XML for readability and write changes back to the file
+        ET.indent(tree, space="    ", level=0)
+        tree.write(route_file_path, encoding="UTF-8", xml_declaration=True)
+        print(f"Vehicle 't_0' arrivalLane successfully set to '{target_lane}' in '{route_file_path}'.")
+
+    except FileNotFoundError:
+        print(f"Error: The route file '{route_file_path}' was not found.")
+        sys.exit(1)
+    except ET.ParseError as e:
+        print(f"Error parsing XML file '{route_file_path}': {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
         sys.exit(1)
 
 
@@ -263,22 +319,19 @@ pair_names = {}
 simulation_steps_unique = [] # List to keep track of unique simulation steps
 lane_data_t0 = [] # New list to store the lane index of t_0 at each step
 
-lista_attivi = [] # This variable does not seem to be used, can be removed if not needed
 step_count = 0
 simulation_time = 0
-max_simulation_time = 300
+max_simulation_time = 30
 
 # --- Generate the scenario ONLY ONCE and get the number of pedestrians ---
 dbase = {}
-num_pedestrians_scenario = defineScenario(dbase, "t_1")
-# DEBUG: Print the number of pedestrians generated
-print(f"DEBUG: Number of pedestrians generated in the scenario: {num_pedestrians_scenario}")
+scenario_params_t1 = defineScenario(dbase, "t_1") # Renamed to avoid conflict with 'scenario' array
+print(f"DEBUG: Number of pedestrians generated in the scenario: {scenario_params_t1['nPedestrian']}")
 
-pedestrian_route_file = "TestCreazioneRete/trolleyNetPed.rou.xml"
-pedestrian_route_file_abs = os.path.join(script_dir, pedestrian_route_file)
-modify_pedestrian_routes(pedestrian_route_file_abs, num_pedestrians_scenario)
+pedestrian_route_file = os.path.join(script_dir, "TestCreazioneRete", "trolleyNetPed.rou.xml")
+modify_pedestrian_routes(pedestrian_route_file, scenario_params_t1['nPedestrian'])
 
-scenario = np.array([
+scenario = np.array([ # This 'scenario' is the input for the NN
     dbase["t_1"]["nPassenger"],
     dbase["t_1"]["probPassenger"],
     dbase["t_1"]["nPedestrian"],
@@ -286,17 +339,44 @@ scenario = np.array([
     dbase["t_1"]["altruism"]
 ])
 scenario = scenario.reshape(1, 5)
-print("Scenario:", scenario)
+print("Scenario for prediction:", scenario)
 # --- End scenario generation ---
 
 # Variables for calculating the probability of death for passengers/pedestrians
-probDeath = scenario[0][3] # by default I leave that of pedestrians (car straight - choice = 0)
+probDeath = None # Initialize to None, will be set by the prediction
+prediction = None # Initialize to None, will be set by the prediction
+t0_initial_setup_done = False # Flag to ensure speed mode/max speed are set only once for t_0
+
+# --- Make the prediction BEFORE the simulation loop starts ---
+if model is not None:
+    prediction = model.predict(scenario, verbose=0)
+    print(f"DEBUG: Initial prediction[0][0]: {prediction[0][0]}")
+    
+    # NEW: Call the function to modify the route file based on prediction
+    car_route_file = os.path.join(script_dir, "TestCreazioneRete", "trolleyNetCar.rou.xml")
+    modify_vehicle_route_based_on_prediction(car_route_file, prediction[0][0])
+
+    if abs(prediction[0][0]) > 0.5: # choice = 1 => the car must turn
+        probDeath = scenario[0][1] # set as death probability that of the passengers
+        print("DEBUG: Prediction indicates car must turn (choice = 1).")
+    else:
+        probDeath = scenario[0][3] # set as death probability that of the pedestrians
+        print("DEBUG: Prediction indicates car must go straight (choice = 0).")
+else:
+    print("Warning: Model is None, prediction will not be made. Defaulting probDeath to pedestrian scenario.")
+    probDeath = scenario[0][3] # Default if no model is loaded
+    # If no model, a default lane might be desired. Here, we'll set it to 1.
+    car_route_file = os.path.join(script_dir, "TestCreazioneRete", "trolleyNetCar.rou.xml")
+    modify_vehicle_route_based_on_prediction(car_route_file, 0.0) # Default to lane 2 if no prediction
+
+# --- End of one-time prediction and route modification ---
+
 
 # Initialize SUMO with traci.start (always in automatic mode)
 sumo_cfg_file = os.path.join(script_dir, "TestCreazioneRete", "trolleyNet.sumocfg")
 
 sumoCmd = [
-    sumolib.checkBinary('sumo-gui'), # CAMBIATO: Usa sumo-gui per la modalità grafica
+    sumolib.checkBinary('sumo-gui'), # Usa sumo-gui per la modalità grafica
     "-c", sumo_cfg_file,
     # "--no-step-log", # Commenta o rimuovi per vedere i log nella GUI
     "--waiting-time-memory", "1000"
@@ -308,22 +388,18 @@ try:
     print("Connected to SUMO.")
 
     # --- Impostazioni per la visualizzazione GUI e la velocità della simulazione ---
-    # Imposta lo zoom iniziale per avere una buona panoramica (regola i valori)
-    traci.gui.setZoom("View #0", 1000) # "View #0" è il nome della vista predefinita in SUMO-GUI
-    # Puoi anche impostare uno schema di visualizzazione se vuoi, es. per mostrare le persone
-    traci.gui.setSchema("View #0", "real world") # O "pedestrians" per focalizzarsi sui pedoni
+    # Check if a GUI view is available before trying to configure it
+    if traci.gui.getIDList():
+        # zoom iniziale
+        traci.gui.setZoom("View #0", 350) # "View #0" --> vista predefinita in SUMO-GUI
+        traci.gui.setSchema("View #0", "real world") # O "pedestrians" per focalizzarsi sui pedoni
+    else:
+        print("DEBUG: No GUI view available. Skipping GUI settings.")
+
 
     # Imposta la velocità di simulazione. Un valore di 1.0 significa 1 secondo di simulazione = 1 secondo reale.
-    # Valori inferiori a 1.0 rallentano la simulazione (es. 0.1 è 10x più lento).
-    # Valori superiori a 1.0 la velocizzano.
-    traci.simulation.setScale(0.1) # CAMBIATO: Rallenta la simulazione di 10 volte per una migliore visualizzazione
+    traci.simulation.setScale(0.01) # Rallenta la simulazione di 10 volte per una migliore visualizzazione
     # --- Fine impostazioni GUI ---
-
-
-    # --- Pedestrian behavior modification variables ---
-    default_ped_speed = 1.3 # meters/second (adjust as needed)
-    collision_threshold_distance = 2.0 # meters, adjust based on desired behavior
-    # --- End pedestrian behavior modification variables ---
 
     # Main simulation loop
     while traci.simulation.getMinExpectedNumber() > 0 and simulation_time < max_simulation_time:
@@ -337,90 +413,45 @@ try:
             simulation_steps_unique.append(step_count)
             simulation_steps_unique.sort() # Keeps the list of steps sorted
 
-        # --- Record lane occupancy for vehicle t_0 ---
+        # --- Handle t_0 vehicle setup (speed mode, max speed) ---
         if "t_0" in traci.vehicle.getIDList():
+            vehID_t0 = "t_0"
+            if not t0_initial_setup_done:
+                try:
+                    # Imposta la velocità massima (m/s). Un valore molto alto per non limitare.
+                    traci.vehicle.setMaxSpeed(vehID_t0, 50.0)
+                    # Disabilita i controlli di velocità interni di SUMO per t_0
+                    traci.vehicle.setSpeedMode(vehID_t0, 0) # 0 = all checks disabled (TraCI controls speed)
+                    # Forzare i cambi di corsia ignorando i controlli di sicurezza e cooperazione
+                    traci.vehicle.setSpeed(vehID_t0, 10)
+                    traci.vehicle.setLaneChangeMode(vehID_t0, 1) # 1 = no safety checks, no cooperativeness
+                    t0_initial_setup_done = True
+                    print(f"DEBUG: {vehID_t0} speed mode and lane change mode set.")
+                except traci.exceptions.TraCIException as e:
+                    print(f"DEBUG: ERRORE TraCI durante l'inizializzazione di {vehID_t0}: {e}")
+                    pass # Riproverà nello step successivo (la flag non è stata ancora settata a True)
+
+            # --- Record lane occupancy for vehicle t_0 ---
             try:
-                traci.vehicle.setMaxSpeed("t_0", 3.8) # Imposta la velocità massima a 0.5 m/s
-                lane_index = traci.vehicle.getLaneIndex("t_0")
+                lane_index = traci.vehicle.getLaneIndex(vehID_t0)
                 lane_data_t0.append(lane_index)
             except traci.exceptions.TraCIException:
-                # If t_0 is present in the ID list but does not have a valid position (e.g. just started/arrived)
-                lane_data_t0.append(np.nan) # Add NaN to indicate missing data
+                lane_data_t0.append(np.nan)
         else:
-            # If t_0 is not present in the simulation at this step
-            lane_data_t0.append(np.nan) # Add NaN to keep the length aligned with steps
-        # --- End lane occupancy recording ---
+            # Se t_0 non è ancora in simulazione o è uscito
+            lane_data_t0.append(np.nan)
+        # --- End t_0 vehicle setup ---
 
-        # DEBUG: Print active vehicles and pedestrians at each step
+
         current_vehicles = traci.vehicle.getIDList()
         current_persons = traci.person.getIDList()
-        # print(f"DEBUG: Step {step_count}: Active vehicles: {current_vehicles}, Active pedestrians: {current_persons}")
-
-
-        for vehID in traci.simulation.getDepartedIDList():
-            if traci.vehicle.getTypeID(vehID) == "reckless":
-                traci.vehicle.setSpeedMode(vehID, 0)
-                traci.vehicle.setSpeed(vehID, 15)
 
         for v1 in traci.vehicle.getIDList():
             for p1 in traci.person.getIDList():
                 calculate_and_store_distance(v1, p1, step_count)
         
-        # --- Start Pedestrian behavior modification logic ---
-        ped_ids = traci.person.getIDList()
-        car_ids = traci.vehicle.getIDList()
-
-        for ped_id in ped_ids:
-            current_ped_speed = traci.person.getSpeed(ped_id)
-            ped_x, ped_y = traci.person.getPosition(ped_id)
-
-            should_force_move = True # Assume pedestrian should try to keep moving
-
-            for car_id in car_ids:
-                try:
-                    car_x, car_y = traci.vehicle.getPosition(car_id)
-                    distance = ((ped_x - car_x)**2 + (ped_y - car_y)**2)**0.5
-
-                    if distance < collision_threshold_distance:
-                        # A car is very close, try to force the pedestrian to continue.
-                        # This might lead to collisions if the threshold is too small or if
-                        # the pedestrian's path directly intersects the car's path without avoidance.
-                        # print(f"DEBUG: Pedestrian {ped_id} close to car {car_id} ({distance:.2f}m). Forcing speed.")
-                        traci.person.setSpeed(ped_id, default_ped_speed)
-                        should_force_move = False # Handled this pedestrian due to car proximity
-                        break # No need to check other cars for this pedestrian
-                except traci.exceptions.TraCIException:
-                    # Car might have left simulation or is not yet active, ignore error
-                    pass
-
-            if should_force_move and current_ped_speed < default_ped_speed:
-                # If no car is too close and the pedestrian is moving slower than desired,
-                # set their speed to the default walking speed.
-                traci.person.setSpeed(ped_id, default_ped_speed)
-        # --- End Pedestrian behavior modification logic ---
-
-        if model is not None and "t_0" in traci.vehicle.getIDList():
-            prediction = model.predict(scenario, verbose=0)
-
-            if abs(prediction[0][0]) > 0.5: # choice = 1 => the car must turn
-
-                # set as death probability that of the passengers
-                probDeath = scenario[0][1]                     
-
-                try:
-                    current_lane_index = traci.vehicle.getLaneIndex("t_0")
-                    current_edge_id = traci.vehicle.getRoadID("t_0")
-
-                    if not current_edge_id.startswith(":"):
-                        num_lanes_on_edge = traci.edge.getLaneNumber(current_edge_id)
-
-                        if current_lane_index + 1 < num_lanes_on_edge:
-                            traci.vehicle.changeLane("t_0", current_lane_index + 1, 0.5)
-                except traci.exceptions.TraCIException as e:
-                    pass # Ignore errors if the lane is not valid or the vehicle is no longer there
-            else:
-                # set as death probability that of the pedestrians
-                probDeath = scenario[0][3]
+        # --- Pedestrian behavior modification logic (commented out as per previous instructions to force collisions) ---
+        # NESSUN CODICE DI MODIFICA VELOCITÀ PEDONI QUI
 
     scenarioDice = random.random()
     print("Dice = ", scenarioDice, "probDeath = ", probDeath, "Prediction: ", round(abs(prediction[0][0])))
