@@ -47,9 +47,10 @@ This repository implements a genetic algorithm to train a neural network for dec
    python3 plotAll.py -g 10
    ```
    -g: Number of generations to visualize (must match run_experiment.py settings)
-
+   
 ## 📁 Project Structure
-  ```bash
+
+```bash
 .
 fixedCode/
     └── run_experiment.py          # Main experiment script (Ethical knob approach)
@@ -97,13 +98,13 @@ Generated plots in grafici/ include:
 - Altruism evolution in the population
 
 ## 📄 License
-
-Add License
+This project is licensed under the [MIT License](LICENSE).
 
 
 ```bash
 ---
-**Note**: Customize paths (e.g., `fixedCode/outputTest`) and parameters as needed. For complex scenarios, adjust values in `Configuration.py`.
+**Note**: Customize paths (e.g., `fixedCode/outputTest`) and parameters as needed.
+For complex scenarios, adjust values in `Configuration.py`.
 ```
  
 
