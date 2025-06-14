@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 # Load Neural Network
 try:
-    model_name_relative = os.path.join(os.path.dirname(os.path.abspath(__file__)), "final_generation_models", "individual_0.keras")
+    model_name_relative = os.path.join(os.path.dirname(os.path.abspath(__file__)), "final_generation_models", "individual_40.keras")
     model = load_model(model_name_relative)
     print("Model successfully loaded from", model_name_relative)
     model.summary()

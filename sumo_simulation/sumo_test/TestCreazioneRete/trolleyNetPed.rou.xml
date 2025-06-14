@@ -10,4 +10,7 @@
     <person id="p_2" depart="0.00" type="fast_pedestrian" jmIgnoreFoeProb="1.0" jmIgnoreFoeSpeed="1.0" jmIgnoreJunctionFoeProb="1.0" jmCrossingGap="0.0">
         <personTrip from="-E4" to="E6" />
     </person>
+    <person id="p_3" depart="0.00" type="fast_pedestrian" jmIgnoreFoeProb="1.0" jmIgnoreFoeSpeed="1.0" jmIgnoreJunctionFoeProb="1.0" jmCrossingGap="0.0">
+        <personTrip from="-E4" to="E6" />
+    </person>
 </routes>
