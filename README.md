@@ -48,7 +48,7 @@ This repository implements a genetic algorithm to train a neural network for dec
    ```
    -g: Number of generations to visualize (must match run_experiment.py settings)
 
-  ## 📁 Project Structure
+  ## 📁 Project Structure
 
    ```bash
    .
@@ -83,14 +83,14 @@ This repository implements a genetic algorithm to train a neural network for dec
    
    ```
 
-## ⚙️ Configurable Parameters
+## ⚙️ Configurable Parameters
 Modify Configuration.py to customize:
 - Neural network architecture (layers, activations)
 - Mutation and crossover probabilities
 - Ethical costs (costPedestrian, costPassengers)
 - Evolutionary parameters (e.g., POPULATION_SIZE, MAX_GENERATIONS)
 
-## 📊 Results
+## 📊 Results
 Generated plots in grafici/ include:
 - Max/Average fitness trends
 - Confusion matrices
