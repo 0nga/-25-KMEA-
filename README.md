@@ -47,41 +47,41 @@ This repository implements a genetic algorithm to train a neural network for dec
    python3 plotAll.py -g 10
    ```
    -g: Number of generations to visualize (must match run_experiment.py settings)
+
+  ## 📁 Project Structure
+
+   ```bash
+   .
+   fixedCode/
+       └── run_experiment.py          # Main experiment script (Ethical knob approach)
+       ├── Configuration.py           # Hyperparameter configuration
+       ├── Individual.py              # Individual definition and genetic operations
+       ├── ga_general.py              # Genetic algorithm implementation
+       ├── plotAll.py                 # Plot generation and metrics
+       ├── requirements.txt           # Dependencies
+       ├── grafici                    # Graphs directory
+       └── outputTest/                # Results and logs (auto-generated)
+   Deontological/
+       └── run_experiment.py          # Main experiment script (Deontological approach)
+       ├── Configuration.py           # Hyperparameter configuration
+       ├── Individual.py              # Individual definition and genetic operations
+       ├── ga_general.py              # Genetic algorithm implementation
+       ├── plotAll.py                 # Plot generation and metrics
+       ├── requirements.txt           # Dependencies
+       ├── grafici                    # Graphs directory
+       └── outputTest/                # Results and logs (auto-generated)
+   Utilitarian/
+       └── run_experiment.py          # Main experiment script (Utilitarian Approach)
+       ├── Configuration.py           # Hyperparameter configuration
+       ├── Individual.py              # Individual definition and genetic operations
+       ├── ga_general.py              # Genetic algorithm implementation
+       ├── plotAll.py                 # Plot generation and metrics
+       ├── requirements.txt           # Dependencies
+       ├── grafici                    # Graphs directory
+       └── outputTest/                # Results and logs (auto-generated)
+   SumoTest
    
-## 📁 Project Structure
-
-```bash
-.
-fixedCode/
-    └── run_experiment.py          # Main experiment script (Ethical knob approach)
-    ├── Configuration.py           # Hyperparameter configuration
-    ├── Individual.py              # Individual definition and genetic operations
-    ├── ga_general.py              # Genetic algorithm implementation
-    ├── plotAll.py                 # Plot generation and metrics
-    ├── requirements.txt           # Dependencies
-    ├── grafici                    # Graphs directory
-    └── outputTest/                # Results and logs (auto-generated)
-Deontological/
-    └── run_experiment.py          # Main experiment script (Deontological approach)
-    ├── Configuration.py           # Hyperparameter configuration
-    ├── Individual.py              # Individual definition and genetic operations
-    ├── ga_general.py              # Genetic algorithm implementation
-    ├── plotAll.py                 # Plot generation and metrics
-    ├── requirements.txt           # Dependencies
-    ├── grafici                    # Graphs directory
-    └── outputTest/                # Results and logs (auto-generated)
-Utilitarian/
-    └── run_experiment.py          # Main experiment script (Utilitarian Approach)
-    ├── Configuration.py           # Hyperparameter configuration
-    ├── Individual.py              # Individual definition and genetic operations
-    ├── ga_general.py              # Genetic algorithm implementation
-    ├── plotAll.py                 # Plot generation and metrics
-    ├── requirements.txt           # Dependencies
-    ├── grafici                    # Graphs directory
-    └── outputTest/                # Results and logs (auto-generated)
-SumoTest
-
-```
+   ```
 
 ## ⚙️ Configurable Parameters
 Modify Configuration.py to customize:
