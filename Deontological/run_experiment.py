@@ -3,7 +3,7 @@ import subprocess
 # Parameters
 prob = 0.1
 num_gen = 500
-savePassengers = 1 # with 0 i save pedestrians --> predAction = 1
+savePassengers = 0 # with 0 i save pedestrians --> predAction = 1
 
 # First command
 command_1 = [
@@ -18,7 +18,7 @@ command_1 = [
 ]
 
 # First command execution
-print("Executing first command:", " ".join(command_1))
+print("Executing 1first command:", " ".join(command_1))
 result_1 = subprocess.run(command_1)
 
 

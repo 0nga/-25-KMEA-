@@ -1,7 +1,6 @@
 import subprocess
 
-
-# PArameters
+# Parameters
 prob = 0.1
 num_gen = 500
 

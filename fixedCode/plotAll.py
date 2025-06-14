@@ -139,6 +139,7 @@ def plot_accuracy(path, output_dir, params):
                 plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='No Skill')
                 plt.xlabel('False Positive Rate')
                 plt.ylabel('True Positive Rate')
+                plt.legend()
                 plt.grid(True)
                 plt.savefig(os.path.join(output_dir, f"roc_gen_{i}.png"))
                 plt.close()

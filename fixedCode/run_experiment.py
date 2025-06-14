@@ -1,15 +1,8 @@
 import subprocess
 
-end_value = 6
-prob_value = (1.0, 0.8, 0.5, 0.1)
-
-prob = 0.1
-i = 2
-
 # Parametri
-i = 4
 prob = 0.1
-num_gen = 5
+num_gen = 500
 
 # Primo comando
 command_1 = [

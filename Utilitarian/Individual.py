@@ -74,8 +74,8 @@ class Individual:
 			cost_pedestrians_straight = numberOfPedestrians * probDeathPedestrians
 			benefit_passengers_straight = numberOfPassengers * (1 - probDeathPassengers) # probDeathPassengers = probabilità di morire se si va dritto
 
-			# utility = (benefit_passengers_straight) - (cost_pedestrians_straight)
-			utility = numberOfPassengers - numberOfPedestrians
+			utility = (benefit_passengers_straight) - (cost_pedestrians_straight)
+			#utility = numberOfPassengers - numberOfPedestrians
 
 			
 		else: # self.predAction == 1: # L'agente decide di svoltare
@@ -83,8 +83,8 @@ class Individual:
 			cost_passengers_turn = numberOfPassengers * probDeathPassengers # Assumendo probDeathPassengers qui sia la probabilità di morire se si svolta
 			benefit_pedestrians_turn = numberOfPedestrians * (1 - probDeathPedestrians) # Assumendo probDeathPedestrians qui sia la probabilità di morire se non si svolta
 
-			# utility = (benefit_pedestrians_turn) - (cost_passengers_turn)
-			utility = numberOfPedestrians - numberOfPassengers
+			utility = (benefit_pedestrians_turn) - (cost_passengers_turn)
+			#utility = numberOfPedestrians - numberOfPassengers
 
 
 
@@ -105,10 +105,9 @@ class Individual:
 		# Min utility when predAction = 0: (min_nPass * (1-max_probPass)) - (max_nPed * min_probPed * max_altruism)
 		# E analogamente per predAction = 1
 
-		# Per il momento, userò un approccio più semplice per la normalizzazione:
-		# Clamping o mapping a un range noto. Se l'utilità può essere negativa e positiva,
+		# approccio più semplice per la normalizzazione:Clamping o mapping a un range noto. 
+		# Se l'utilità può essere negativa e positiva,
 		# puoi mapparla a [0, 1] con un'ipotesi sui valori min/max.
-		# Questo è un esempio, calcola i veri estremi della tua funzione di utilità:
 		hypothetical_min_utility = - (max_nPed + max_nPass) # Stima pessimistica
 		hypothetical_max_utility = (max_nPed + max_nPass)  # Stima ottimistica
 
@@ -123,8 +122,8 @@ class Individual:
 		return self.predAction # Ritorna l'azione decisa dalla NN
 
 	def computeSelfEsteem(self, conf, ideal_utilitarian_action):
-		# Qui, ideal_utilitarian_action è la 'convieneSvolta' calcolata in ga_general.py,
-		# Essa rappresenta la scelta utilitaristica ideale per lo scenario.
+		# ideal_utilitarian_action è la 'convieneSvolta' calcolata in ga_general.py,
+		# rappresenta la scelta utilitaristica ideale per lo scenario.
 		# self.predAction è l'azione effettivamente presa dalla rete neurale.
 
 		reward = 0

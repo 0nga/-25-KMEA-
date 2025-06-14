@@ -1,6 +1,0 @@
-	numberOfPedestrians	probPed	numberOfPassengers	probPass	AltruismLevel	KnobLevel	Fitness	convieneSvolta	predAction
-0	5,0	1,0	2,0	1,0	0,1	-1	0,5406976744186046	0	1
-1	5,0	1,0	5,0	1,0	0,1	-1	0,36627906976744184	0	0
-2	1,0	1,0	5,0	1,0	0,1	-1	1,0531088082901554	0	0
-3	1,0	1,0	4,0	1,0	0,1	-1	1,0016339869281046	0	0
-4	6,0	1,0	5,0	1,0	0,1	-1	0,13759689922480617	0	1
