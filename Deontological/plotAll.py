@@ -72,7 +72,6 @@ def plot_max_fitness(path, output_dir, params):
 
     plt.figure(figsize=(8, 8))
     sns.lineplot(x="index", y="maxFit", data=maxFitness)
-    plt.title("Andamento della Massima Fitness")
     plt.xlabel("Generazione")
     plt.ylabel("Fitness Massima")
     plt.tight_layout()
@@ -81,7 +80,6 @@ def plot_max_fitness(path, output_dir, params):
 
     plt.figure(figsize=(8, 8))
     sns.lineplot(x="type", y="Fitness", data=avgFitness)
-    plt.title("Fitness Media per Generazione")
     plt.xlabel("Generazione")
     plt.ylabel("Fitness Media")
     plt.tight_layout()
@@ -99,12 +97,6 @@ def plot_mean_fitness(path, output_dir, params):
         avgFitness = pd.concat([avgFitness, l], ignore_index=True)
 
     plt.figure(figsize=(8, 8))
-    title = f"Probability of Death for Pedestrian: {params['probPed']}"
-    altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
-    ax = sns.lineplot(x="type", y="AltruismLevel", data=avgFitness, 
-                     label=f"selfish: {1 - altruism_value}")
-    ax.set(xlabel='Generation', ylabel='AltruismLevel')
-    plt.title(title)
 
     filename = f"altruism_probPed_{params['probPed']}_costPed_{params['costPed']}.png"
     plt.tight_layout()
@@ -147,8 +139,6 @@ def plot_accuracy(path, output_dir, params):
                 plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='No Skill')
                 plt.xlabel('False Positive Rate')
                 plt.ylabel('True Positive Rate')
-                plt.title(f'ROC Curve - Generation {i}')
-                plt.legend()
                 plt.grid(True)
                 plt.savefig(os.path.join(output_dir, f"roc_gen_{i}.png"))
                 plt.close()
@@ -176,20 +166,16 @@ def plot_accuracy(path, output_dir, params):
     accuracyList.generation = accuracyList.generation.astype('float64')
     accuracyList.accuracy = accuracyList.accuracy.astype('float64')
 
-    altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
-    title = f"Death Pedestrian: {params['probPed']} selfish: {1 - altruism_value}"
 
     plt.figure(figsize=(8, 8))
     ax = sns.regplot(
         x="generation",
         y="accuracy",
         data=accuracyList.assign(accuracy=accuracyList.accuracy / params['pop_size']),
-        label=f"selfish: {1 - altruism_value}",
         scatter=True
     )
     ax.legend(loc=4)
     ax.set(xlabel='Generation', ylabel='Accuracy')
-    plt.title(title)
     plt.savefig(os.path.join(output_dir, f"accuracy_curve_altruism_{params['altruismLevel']}.png"))
     plt.close()
 
@@ -200,7 +186,6 @@ def plot_accuracy(path, output_dir, params):
     plt.plot(accuracyList.generation, np.array(fp_list) / params['pop_size'], label="False Positive")
     plt.plot(accuracyList.generation, np.array(fn_list) / params['pop_size'], label="False Negative")
     plt.legend(loc="best")
-    plt.title(title)
     plt.savefig(os.path.join(output_dir, f"accuracy_curve_altruism2_{params['altruismLevel']}.png"))
     plt.close()
 
@@ -250,7 +235,6 @@ def plot_classification_metrics(path, output_dir, params):
             print(f"Errore alla generazione {i}: {e}")
 
     altruism_value = float(params['altruismLevel']) if isinstance(params['altruismLevel'], str) else params['altruismLevel']
-    title = f"Death Pedestrian: {params['probPed']} selfish: {1 - altruism_value}"
 
     def plot_metric(data_list, metric_name, ylabel):
         df = pd.DataFrame(data_list)
@@ -263,11 +247,9 @@ def plot_classification_metrics(path, output_dir, params):
             y=metric_name,
             data=df,
             scatter=True,
-            label=f"selfish: {1 - altruism_value}"
         )
-        ax.legend(loc=4)
+        #ax.legend(loc=4)
         ax.set(xlabel='Generation', ylabel=ylabel)
-        plt.title(title)
         plt.savefig(os.path.join(output_dir, f"{metric_name}_curve_altruism_{params['altruismLevel']}.png"))
         plt.close()
 
@@ -295,7 +277,11 @@ def plot_confusion_matrix_last_generation(path, output_dir, params):
 
         # Plot confusion matrix
         plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'])
+        #sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'])
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=['Pred No', 'Pred Yes'], yticklabels=['True No', 'True Yes'],
+                    annot_kws={"size": 16})
+        
         plt.title(f"Confusion Matrix - Generation {params['max_gen']}")
         plt.xlabel('Predicted')
         plt.ylabel('True')
